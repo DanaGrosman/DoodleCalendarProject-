@@ -19,9 +19,9 @@ public class EventController {
 	private EventService eventService;
 	
 	@PostMapping
-	public ResponseEntity<?> createEvent(Event event){
+	public ResponseEntity<?> createEvent(Integer id, Event event){
 	try {
-		eventService.addEvent(event);
+		eventService.addEventByUser(id, event);
 		event = eventService.getEventById(event.getEventId());
 		return ResponseEntity.status(HttpStatus.CREATED).body(event);
 	} catch (DaoException e) {

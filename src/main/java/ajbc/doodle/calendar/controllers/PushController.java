@@ -25,7 +25,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,7 +50,7 @@ import ajbc.doodle.calendar.services.CryptoService;
 
 @RestController
 public class PushController {
-	
+
 	private final ServerKeys serverKeys;
 	private final CryptoService cryptoService;
 	private final Map<String, Subscription> subscriptions = new ConcurrentHashMap<>();
@@ -84,26 +83,23 @@ public class PushController {
 	@PostMapping("/subscribe/{email}")
 	@ResponseStatus(HttpStatus.CREATED)
 	public void subscribe(@RequestBody Subscription subscription, @PathVariable(required = false) String email) {
-		//if user is registered allow subscription
+		// if user is registered allow subscription
 		this.subscriptions.put(subscription.getEndpoint(), subscription);
-		System.out.println("Subscription added with email "+email);
+		System.out.println("Subscription added with email " + email);
 	}
 
-	
 	@PostMapping("/unsubscribe/{email}")
-	public void unsubscribe(@RequestBody SubscriptionEndpoint subscription, @PathVariable(required = false) String email) {
+	public void unsubscribe(@RequestBody SubscriptionEndpoint subscription,
+			@PathVariable(required = false) String email) {
 		this.subscriptions.remove(subscription.getEndpoint());
-		System.out.println("Subscription with email "+email+" got removed!");
+		System.out.println("Subscription with email " + email + " got removed!");
 	}
-
 
 	@PostMapping("/isSubscribed")
 	public boolean isSubscribed(@RequestBody SubscriptionEndpoint subscription) {
 		return this.subscriptions.containsKey(subscription.getEndpoint());
 	}
 
-
-	
 	@Scheduled(fixedDelay = 3_000)
 	public void testNotification() {
 		if (this.subscriptions.isEmpty()) {
@@ -111,9 +107,10 @@ public class PushController {
 		}
 		counter++;
 		try {
-			
-			Notification notification = new Notification(counter, Unit.HOURS, 1, LocalDateTime.now());
-			sendPushMessageToAllSubscribers(this.subscriptions, new PushMessage("message: " + counter, notification.toString()));
+
+			Notification notification = new Notification(counter, 1000, 1000, Unit.HOURS, 1, LocalDateTime.now());
+			sendPushMessageToAllSubscribers(this.subscriptions,
+					new PushMessage("message: " + counter, notification.toString()));
 			System.out.println(notification);
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block

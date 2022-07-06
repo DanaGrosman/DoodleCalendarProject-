@@ -4,11 +4,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -38,11 +39,16 @@ public class Event {
 	private LocalDateTime endDateTime;
 	private String description;
 
-	@OneToMany(targetEntity = User.class, mappedBy = "userId", fetch = FetchType.EAGER)
+	@ManyToMany
+	@JoinTable(
+	  name = "user_events", 
+	  joinColumns = @JoinColumn(name = "eventId"), 
+	  inverseJoinColumns = @JoinColumn(name = "userId"))
 	private List<User> guests;
 
 	public Event(Integer ownerId, String title, String address, Boolean isAllDay, LocalDateTime startDateTime,
-			LocalDateTime endDateTime, String description) {
+			LocalDateTime endDateTime, String description, List<User> guests) {
+		super();
 		this.ownerId = ownerId;
 		this.title = title;
 		this.address = address;
@@ -50,5 +56,6 @@ public class Event {
 		this.startDateTime = startDateTime;
 		this.endDateTime = endDateTime;
 		this.description = description;
+		this.guests = guests;
 	}
 }

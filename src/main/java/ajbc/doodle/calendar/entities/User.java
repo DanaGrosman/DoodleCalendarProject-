@@ -1,9 +1,12 @@
 package ajbc.doodle.calendar.entities;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -28,6 +31,9 @@ public class User {
 	private String firstName;
 	private String lastName;
 	private String email;
+
+	@ManyToMany(mappedBy = "guests")
+	List<Event> userEvents;
 
 	public User(String firstName, String lastName, String email) {
 		this.firstName = firstName;

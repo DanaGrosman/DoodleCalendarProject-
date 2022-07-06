@@ -2,25 +2,24 @@ package ajbc.doodle.calendar.daos;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import ajbc.doodle.calendar.entities.Event;
-
+import ajbc.doodle.calendar.entities.Notification;
 
 @Transactional(rollbackFor = { DaoException.class }, readOnly = true)
-public interface EventDao {
+public interface NotificationDao {
 
 	// CRUD operations
 	@Transactional(readOnly = false)
-	public default void addEventToDB(Event event) throws DaoException {
+	public default void addNotificationToDB(Notification notification) throws DaoException {
 		throw new DaoException("Method not implemented");
 	}
 
 	@Transactional(readOnly = false)
-	public default Event getEventById(Integer id) throws DaoException {
+	public default Notification getNotificationById(Integer id) throws DaoException {
 		throw new DaoException("Method not implemented");
-	}	
+	}
 	
 	@Transactional(readOnly = false)
-	public default void updateEvent(Event event) throws DaoException {
+	public default void updateNotification(Notification notification) throws DaoException {
 		throw new DaoException("Method not implemented");
 	}
 }

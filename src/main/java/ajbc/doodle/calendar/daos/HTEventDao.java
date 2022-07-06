@@ -14,7 +14,7 @@ public class HTEventDao implements EventDao {
 	private HibernateTemplate template;
 
 	@Override
-	public void addEventToDB(Integer userId, Event event) throws DaoException {
+	public void addEventToDB(Event event) throws DaoException {
 		// open session /connection to db
 		template.persist(event);
 		// close session
@@ -26,5 +26,10 @@ public class HTEventDao implements EventDao {
 		if (event == null)
 			throw new DaoException("No such event in DB");
 		return event;
+	}
+	
+	@Override
+	public void updateEvent(Event event) throws DaoException {
+		template.merge(event);
 	}
 }

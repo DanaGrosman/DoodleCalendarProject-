@@ -27,4 +27,9 @@ public class HTUserDao implements UserDao {
 			throw new DaoException("No such user in DB");
 		return user;
 	}
+	
+	@Override
+	public void updateUser(User user) throws DaoException {
+		template.merge(user);
+	}
 }

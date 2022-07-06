@@ -23,4 +23,10 @@ public class UserService {
 		User user = userDao.getUserById(id);
 		return user;
 	}
+	
+	public User updateUser(Integer id, User user) throws DaoException {
+		userDao.updateUser(user);
+		user = userDao.getUserById(id);
+		return user;
+	}
 }
