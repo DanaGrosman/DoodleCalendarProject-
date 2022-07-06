@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,6 +35,7 @@ public class User {
 	private String email;
 
 	@ManyToMany(mappedBy = "guests")
+	@JsonIgnore
 	List<Event> userEvents;
 
 	public User(String firstName, String lastName, String email) {

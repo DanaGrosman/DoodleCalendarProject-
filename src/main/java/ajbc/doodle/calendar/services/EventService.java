@@ -1,5 +1,7 @@
 package ajbc.doodle.calendar.services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -41,5 +43,9 @@ public class EventService {
 		} else
 			System.out.println("You are not the owner of this event");
 		return event;
+	}
+
+	public List<Event> getAllEvents() throws DaoException {
+		return eventDao.getAllEvents();
 	}
 }

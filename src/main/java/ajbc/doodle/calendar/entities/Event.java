@@ -12,6 +12,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,6 +46,7 @@ public class Event {
 	  name = "user_events", 
 	  joinColumns = @JoinColumn(name = "eventId"), 
 	  inverseJoinColumns = @JoinColumn(name = "userId"))
+	@JsonIgnore
 	private List<User> guests;
 
 	public Event(Integer ownerId, String title, String address, Boolean isAllDay, LocalDateTime startDateTime,

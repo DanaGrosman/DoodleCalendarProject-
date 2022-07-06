@@ -1,5 +1,7 @@
 package ajbc.doodle.calendar.services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -28,5 +30,9 @@ public class UserService {
 		userDao.updateUser(user);
 		user = userDao.getUserById(id);
 		return user;
+	}
+
+	public List<User> getAllUsers() throws DaoException {
+		return userDao.getAllUsers();
 	}
 }
