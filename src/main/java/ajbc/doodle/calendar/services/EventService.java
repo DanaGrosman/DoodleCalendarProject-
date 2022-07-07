@@ -32,8 +32,10 @@ public class EventService {
 	public void addEventByUser(Integer userId, Event event) throws DaoException {
 		eventDao.addEventToDB(event);
 		for (int i = 0; i < event.getGuests().size(); i++) {
-			notificationDao.addNotificationToDB(new Notification(event.getGuests().get(i).getUserId(),
-					event.getEventId(), Unit.MINUTES, 0, event.getStartDateTime()));
+			Notification notification =  new Notification(Unit.MINUTES, 0, event.getStartDateTime());
+			notification.setEvent(eventDao.getEventById(event.getEventId()));
+			notification.setUser(userDao.getUserById(userId));
+			notificationDao.addNotificationToDB(notification);
 		}
 	}
 

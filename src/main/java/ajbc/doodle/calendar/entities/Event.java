@@ -2,8 +2,8 @@ package ajbc.doodle.calendar.entities;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -49,8 +49,8 @@ public class Event {
 	@JsonIgnore
 	private List<User> guests;
 
-	@OneToMany(mappedBy = "event")
-	private List<Notification> notifications;
+	@OneToMany(mappedBy = "event", fetch = FetchType.EAGER)
+	private Set<Notification> notifications;
 
 	public Event(Integer ownerId, String title, String address, Boolean isAllDay, LocalDateTime startDateTime,
 			LocalDateTime endDateTime, String description, List<User> guests) {

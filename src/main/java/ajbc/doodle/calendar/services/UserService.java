@@ -26,6 +26,11 @@ public class UserService {
 		return user;
 	}
 	
+	public User getUserByEmail(String email) throws DaoException {
+		User user = userDao.getUserByEmail(email);
+		return user;
+	}
+	
 	public User updateUser(Integer id, User user) throws DaoException {
 		userDao.updateUser(user);
 		user = userDao.getUserById(id);
@@ -35,4 +40,5 @@ public class UserService {
 	public List<User> getAllUsers() throws DaoException {
 		return userDao.getAllUsers();
 	}
+
 }

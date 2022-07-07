@@ -1,6 +1,7 @@
 package ajbc.doodle.calendar.entities;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -32,11 +33,14 @@ public class User {
 	private String firstName;
 	private String lastName;
 	private String email;
+	private Integer isActive; // 0 - active , 1 - not active
+	private Integer isLogged; // 0 - logout , 1 - login
 
 	@ManyToMany(mappedBy = "guests", fetch = FetchType.EAGER)
-	List<Event> userEvents;
+	Set<Event> userEvents;
 
 	public User(String firstName, String lastName, String email) {
+		super();
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;

@@ -33,7 +33,7 @@ public class AppDB {
 	@EventListener
 	public void seedDb(ContextRefreshedEvent contextRefreshedEvent) {
 //		seedUsersTable();
-		seedEventsTable();
+//		seedEventsTable();
 //		seedNotificationTable();
 		
 //		try {
@@ -49,13 +49,12 @@ public class AppDB {
 	}
 
 	private void seedNotificationTable() {
-		try {
-			notificationService.addNotificationByEventAndUser(
-					new Notification(1016, 1028, Unit.MINUTES, 0, LocalDateTime.now()));
-		} catch (DaoException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
+//		try {
+//
+//		} catch (DaoException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}		
 	}
 
 	private void seedEventsTable() {
@@ -67,13 +66,11 @@ public class AppDB {
 //			eventService.addEventByUser(1015, new Event(1015, "Exam", "Experis", false, LocalDateTime.now(),
 //					LocalDateTime.now().plusHours(2), "JAVA"));
 
-			User user1 = userService.getUserById(1000);
-			User user2 = userService.getUserById(1013);
-			User user3 = userService.getUserById(1014);
-			User user4 = userService.getUserById(1016);
-
-			eventService.addEventByUser(1000, new Event(1014, "Vacation", "Eilat", false, LocalDateTime.now(),
-					LocalDateTime.now().plusHours(1), "Queen Sheva", Arrays.asList(user1, user2, user3)));
+			User user1 = userService.getUserById(1015);
+			User user2 = userService.getUserById(1016);
+			
+			eventService.addEventByUser(1015, new Event(1015, "Wedding", "Emek Hefer", false, LocalDateTime.now(),
+					LocalDateTime.now().plusHours(1), "Sen", Arrays.asList(user1, user2)));
 			
 		} catch (DaoException e) {
 			e.printStackTrace();

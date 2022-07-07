@@ -108,7 +108,7 @@ public class PushController {
 		counter++;
 		try {
 
-			Notification notification = new Notification(counter, 1000, 1000, Unit.HOURS, 1, LocalDateTime.now());
+			Notification notification = new Notification(counter, Unit.HOURS, 1, LocalDateTime.now());
 			sendPushMessageToAllSubscribers(this.subscriptions,
 					new PushMessage("message: " + counter, notification.toString()));
 			System.out.println(notification);

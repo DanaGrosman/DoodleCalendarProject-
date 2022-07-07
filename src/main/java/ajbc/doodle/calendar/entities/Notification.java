@@ -33,12 +33,12 @@ public class Notification {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer notificationId;
 
-	@Column(name = "eventId", insertable = false, updatable = false)
+	@Column(name = "eventId",insertable = false, updatable = false)
 	private Integer eventId;
-
+	
 	@Column(name = "userId", insertable = false, updatable = false)
 	private Integer userId;
-
+	
 	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "eventId")
@@ -53,24 +53,19 @@ public class Notification {
 	private int quantity;
 	private LocalDateTime localDateTime;
 
-	public Notification(Integer userId, Integer eventId, Unit unit, int quantity, LocalDateTime localDateTime) {
+	public Notification(Unit unit, int quantity, LocalDateTime localDateTime) {
 		super();
-		this.userId = userId;
-		this.eventId = eventId;
 		this.unit = unit;
 		this.quantity = quantity;
 		this.localDateTime = localDateTime;
 	}
 
-	public Notification(Integer notificationId, Integer userId, Integer eventId, Unit unit, int quantity,
+	public Notification(Integer notificationId, Unit unit, int quantity,
 			LocalDateTime localDateTime) {
 		super();
 		this.notificationId = notificationId;
-		this.userId = userId;
-		this.eventId = eventId;
 		this.unit = unit;
 		this.quantity = quantity;
 		this.localDateTime = localDateTime;
 	}
-
 }
