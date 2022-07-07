@@ -3,13 +3,16 @@ package ajbc.doodle.calendar.entities;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -42,12 +45,12 @@ public class Event {
 	private String description;
 
 	@ManyToMany
-	@JoinTable(
-	  name = "user_events", 
-	  joinColumns = @JoinColumn(name = "eventId"), 
-	  inverseJoinColumns = @JoinColumn(name = "userId"))
+	@JoinTable(name = "user_events", joinColumns = @JoinColumn(name = "eventId"), inverseJoinColumns = @JoinColumn(name = "userId"))
 	@JsonIgnore
 	private List<User> guests;
+
+	@OneToMany(mappedBy = "event")
+	private List<Notification> notifications;
 
 	public Event(Integer ownerId, String title, String address, Boolean isAllDay, LocalDateTime startDateTime,
 			LocalDateTime endDateTime, String description, List<User> guests) {

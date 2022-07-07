@@ -34,7 +34,6 @@ public class Product {
 	@Column(insertable = false, updatable = false)
 	private Integer supplierId;
 	
-	
 	@ManyToOne(cascade = {CascadeType.MERGE})
 	@JoinColumn(name="supplierId")
 	private Supplier supplier;

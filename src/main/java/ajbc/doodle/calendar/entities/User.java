@@ -3,13 +3,12 @@ package ajbc.doodle.calendar.entities;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,8 +33,7 @@ public class User {
 	private String lastName;
 	private String email;
 
-	@ManyToMany(mappedBy = "guests")
-	@JsonIgnore
+	@ManyToMany(mappedBy = "guests", fetch = FetchType.EAGER)
 	List<Event> userEvents;
 
 	public User(String firstName, String lastName, String email) {

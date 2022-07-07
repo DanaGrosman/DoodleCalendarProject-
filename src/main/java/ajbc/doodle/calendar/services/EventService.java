@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import ajbc.doodle.calendar.daos.DaoException;
 import ajbc.doodle.calendar.daos.EventDao;
 import ajbc.doodle.calendar.daos.NotificationDao;
+import ajbc.doodle.calendar.daos.UserDao;
 import ajbc.doodle.calendar.entities.Event;
 import ajbc.doodle.calendar.entities.Notification;
 import ajbc.doodle.calendar.entities.Unit;
@@ -23,12 +24,17 @@ public class EventService {
 	@Autowired
 	@Qualifier("htNotificationDao")
 	NotificationDao notificationDao;
+	
+	@Autowired
+	@Qualifier("htUserDao")
+	UserDao userDao;
 
 	public void addEventByUser(Integer userId, Event event) throws DaoException {
 		eventDao.addEventToDB(event);
-		for (int i = 0; i < event.getGuests().size(); i++)
+		for (int i = 0; i < event.getGuests().size(); i++) {
 			notificationDao.addNotificationToDB(new Notification(event.getGuests().get(i).getUserId(),
 					event.getEventId(), Unit.MINUTES, 0, event.getStartDateTime()));
+		}
 	}
 
 	public Event getEventById(Integer id) throws DaoException {
