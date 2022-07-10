@@ -25,6 +25,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,12 +42,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ajbc.doodle.calendar.Application;
 import ajbc.doodle.calendar.ServerKeys;
+import ajbc.doodle.calendar.daos.DaoException;
 import ajbc.doodle.calendar.entities.Notification;
+import ajbc.doodle.calendar.entities.SubscriptionData;
 import ajbc.doodle.calendar.entities.Unit;
+import ajbc.doodle.calendar.entities.User;
 import ajbc.doodle.calendar.entities.webpush.PushMessage;
 import ajbc.doodle.calendar.entities.webpush.Subscription;
 import ajbc.doodle.calendar.entities.webpush.SubscriptionEndpoint;
 import ajbc.doodle.calendar.services.CryptoService;
+import ajbc.doodle.calendar.services.UserService;
 
 @RestController
 public class PushController {
@@ -60,6 +65,9 @@ public class PushController {
 	private final Algorithm jwtAlgorithm;
 	private final ObjectMapper objectMapper;
 	private int counter;
+
+	@Autowired
+	private UserService userService;
 
 	public PushController(ServerKeys serverKeys, CryptoService cryptoService, ObjectMapper objectMapper) {
 		this.serverKeys = serverKeys;
@@ -82,10 +90,31 @@ public class PushController {
 
 	@PostMapping("/subscribe/{email}")
 	@ResponseStatus(HttpStatus.CREATED)
-	public void subscribe(@RequestBody Subscription subscription, @PathVariable(required = false) String email) {
-		// if user is registered allow subscription
-		this.subscriptions.put(subscription.getEndpoint(), subscription);
-		System.out.println("Subscription added with email " + email);
+	public void login(@RequestBody Subscription subscription, @PathVariable(required = false) String email)
+			throws DaoException {
+		// 1 if user exist (by email) set login flag to true
+		User user = userService.getUserByEmail(email);
+
+		if (user != null) {
+			user.setIsLogged(true);
+
+			// 2 for each user save the subscription info 3 things
+			System.out.println("public key:" + subscription.getKeys().getP256dh());
+			System.out.println("auth key: " + subscription.getKeys().getAuth());
+			System.out.println("End Point: " + subscription.getEndpoint());
+
+			String publicKey = subscription.getKeys().getP256dh();
+			String authKey = subscription.getKeys().getAuth();
+			String endPoint = subscription.getEndpoint();
+
+			SubscriptionData subData = new SubscriptionData(publicKey, authKey, endPoint);
+			user.setSubscriptionData(subData);
+			userService.updateUser(user.getUserId(), user);
+			user = userService.getUserById(user.getUserId());
+
+			this.subscriptions.put(subscription.getEndpoint(), subscription);
+			System.out.println("Subscription added with email " + email);
+		}
 	}
 
 	@PostMapping("/unsubscribe/{email}")
@@ -93,6 +122,7 @@ public class PushController {
 			@PathVariable(required = false) String email) {
 		this.subscriptions.remove(subscription.getEndpoint());
 		System.out.println("Subscription with email " + email + " got removed!");
+		// 1 if user exist (by email) set login flag to false
 	}
 
 	@PostMapping("/isSubscribed")
@@ -107,7 +137,6 @@ public class PushController {
 		}
 		counter++;
 		try {
-
 			Notification notification = new Notification(counter, Unit.HOURS, 1, LocalDateTime.now());
 			sendPushMessageToAllSubscribers(this.subscriptions,
 					new PushMessage("message: " + counter, notification.toString()));
@@ -116,19 +145,18 @@ public class PushController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
-
-	private void sendPushMessageToAllSubscribersWithoutPayload() {
-		Set<String> failedSubscriptions = new HashSet<>();
-		for (Subscription subscription : this.subscriptions.values()) {
-			boolean remove = sendPushMessage(subscription, null);
-			if (remove) {
-				failedSubscriptions.add(subscription.getEndpoint());
-			}
-		}
-		failedSubscriptions.forEach(this.subscriptions::remove);
-	}
+//
+//	private void sendPushMessageToAllSubscribersWithoutPayload() {
+//		Set<String> failedSubscriptions = new HashSet<>();
+//		for (Subscription subscription : this.subscriptions.values()) {
+//			boolean remove = sendPushMessage(subscription, null);
+//			if (remove) {
+//				failedSubscriptions.add(subscription.getEndpoint());
+//			}
+//		}
+//		failedSubscriptions.forEach(this.subscriptions::remove);
+//	}
 
 	private void sendPushMessageToAllSubscribers(Map<String, Subscription> subs, Object message)
 			throws JsonProcessingException {

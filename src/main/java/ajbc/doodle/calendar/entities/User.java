@@ -1,14 +1,16 @@
 package ajbc.doodle.calendar.entities;
 
-import java.util.List;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -33,8 +35,12 @@ public class User {
 	private String firstName;
 	private String lastName;
 	private String email;
-	private Integer isActive; // 0 - active , 1 - not active
-	private Integer isLogged; // 0 - logout , 1 - login
+	private Boolean isActive; // 0 - active , 1 - not active
+	private Boolean isLogged; // 0 - logout , 1 - login
+	
+	@OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "subId")	
+	private SubscriptionData subscriptionData;
 
 	@ManyToMany(mappedBy = "guests", fetch = FetchType.EAGER)
 	Set<Event> userEvents;

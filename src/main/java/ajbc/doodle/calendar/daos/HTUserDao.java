@@ -26,18 +26,39 @@ public class HTUserDao implements UserDao {
 	}
 
 	@Override
+	public void addListOfUsersToDB(List<User> users) throws DaoException {
+		// open session /connection to db
+		template.persist(users);
+		// close session
+	}
+	
+	@Override
+	public List<User> getAllUsers() throws DaoException {
+		DetachedCriteria criteria = DetachedCriteria.forClass(User.class);
+		return (List<User>) template.findByCriteria(criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY));
+	}
+
+	@Override
 	public User getUserById(Integer id) throws DaoException {
 		User user = template.get(User.class, id);
 		if (user == null)
 			throw new DaoException("No such user in DB");
 		return user;
 	}
-	
+
 	@Override
 	public User getUserByEmail(String email) throws DaoException {
 		DetachedCriteria criteria = DetachedCriteria.forClass(User.class);
 		criteria.add(Restrictions.eq("email", email));
-		return ((List<User>)template.findByCriteria(criteria)).get(0);
+		List<User> users = ((List<User>) template.findByCriteria(criteria));
+		return users.size() > 0 ? users.get(0) : null;
+	}
+
+	@Override
+	public List<User> getUsersByEventId(Integer eventId) throws DaoException {
+		DetachedCriteria criteria = DetachedCriteria.forClass(User.class);
+		criteria.add(Restrictions.eq("eventId", eventId));
+		return ((List<User>) template.findByCriteria(criteria));
 	}
 
 	@Override
@@ -45,9 +66,4 @@ public class HTUserDao implements UserDao {
 		template.merge(user);
 	}
 
-	@Override
-	public List<User> getAllUsers() throws DaoException {
-		DetachedCriteria criteria = DetachedCriteria.forClass(User.class);
-		return (List<User>) template.findByCriteria(criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY));
-	}
 }

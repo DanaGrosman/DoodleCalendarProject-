@@ -20,6 +20,14 @@ public class UserService {
 	public void addUser(User user) throws DaoException {
 		userDao.addUserToDB(user);
 	}
+	
+	public void addListOfUsers(List<User> users) throws DaoException {
+		userDao.addListOfUsersToDB(users);
+	}
+	
+	public List<User> getAllUsers() throws DaoException {
+		return userDao.getAllUsers();
+	}
 
 	public User getUserById(Integer id) throws DaoException {
 		User user = userDao.getUserById(id);
@@ -31,14 +39,15 @@ public class UserService {
 		return user;
 	}
 	
+	public List<User> getUsersByEventId(Integer eventId) throws DaoException {
+		return userDao.getUsersByEventId(eventId);
+	}
+	
 	public User updateUser(Integer id, User user) throws DaoException {
 		userDao.updateUser(user);
 		user = userDao.getUserById(id);
 		return user;
 	}
 
-	public List<User> getAllUsers() throws DaoException {
-		return userDao.getAllUsers();
-	}
 
 }
