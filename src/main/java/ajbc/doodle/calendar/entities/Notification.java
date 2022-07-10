@@ -33,7 +33,7 @@ public class Notification {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer notificationId;
 
-	@Column(name = "eventId",insertable = false, updatable = false)
+	@Column(name = "eventId", insertable = false, updatable = false)
 	private Integer eventId;
 	
 	@Column(name = "userId", insertable = false, updatable = false)
@@ -52,20 +52,31 @@ public class Notification {
 	private Unit unit;
 	private int quantity;
 	private LocalDateTime localDateTime;
-
-	public Notification(Unit unit, int quantity, LocalDateTime localDateTime) {
+	
+	public Notification(Integer eventId, Integer userId, Unit unit, int quantity, LocalDateTime localDateTime) {
 		super();
+		this.eventId = eventId;
+		this.userId = userId;
 		this.unit = unit;
 		this.quantity = quantity;
 		this.localDateTime = localDateTime;
 	}
-
-	public Notification(Integer notificationId, Unit unit, int quantity,
-			LocalDateTime localDateTime) {
-		super();
-		this.notificationId = notificationId;
-		this.unit = unit;
-		this.quantity = quantity;
-		this.localDateTime = localDateTime;
-	}
+	
+//	
+//	
+//	public Notification(Unit unit, int quantity, LocalDateTime localDateTime) {
+//		super();
+//		this.unit = unit;
+//		this.quantity = quantity;
+//		this.localDateTime = localDateTime;
+//	}
+//
+//	public Notification(Integer notificationId, Unit unit, int quantity,
+//			LocalDateTime localDateTime) {
+//		super();
+//		this.notificationId = notificationId;
+//		this.unit = unit;
+//		this.quantity = quantity;
+//		this.localDateTime = localDateTime;
+//	}
 }

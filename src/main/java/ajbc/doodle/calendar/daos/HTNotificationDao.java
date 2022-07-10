@@ -23,6 +23,12 @@ public class HTNotificationDao implements NotificationDao {
 		template.persist(notification);
 		// close session
 	}
+	
+	@Override
+	public List<Notification> getAllNotifications() throws DaoException {
+		DetachedCriteria criteria = DetachedCriteria.forClass(Notification.class);
+		return (List<Notification>) template.findByCriteria(criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY));
+	}
 
 	@Override
 	public Notification getNotificationById(Integer id) throws DaoException {
@@ -37,9 +43,5 @@ public class HTNotificationDao implements NotificationDao {
 		template.merge(notification);
 	}
 	
-	@Override
-	public List<Notification> getAllNotifications() throws DaoException {
-		DetachedCriteria criteria = DetachedCriteria.forClass(Notification.class);
-		return (List<Notification>) template.findByCriteria(criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY));
-	}
+
 }

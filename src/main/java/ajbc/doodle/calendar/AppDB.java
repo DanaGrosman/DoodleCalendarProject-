@@ -37,12 +37,11 @@ public class AppDB {
 //		seedNotificationTable();
 		
 //		try {
-//			Event event = eventService.getEventById(1033);
-//			event.setTitle("Mall2");
-//			event = eventService.updateEvent(1000, event);		
+//			Notification notification = notificationService.getNotificationById(1303);
+//			notification.setUnit(Unit.HOURS);
+//			notification = notificationService.updateNotification(notification);		
 //			
 //		} catch (DaoException e) {
-//			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
 
@@ -52,7 +51,6 @@ public class AppDB {
 //		try {
 //
 //		} catch (DaoException e) {
-//			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}		
 	}

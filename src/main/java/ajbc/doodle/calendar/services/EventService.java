@@ -24,7 +24,7 @@ public class EventService {
 	@Autowired
 	@Qualifier("htNotificationDao")
 	NotificationDao notificationDao;
-	
+
 	@Autowired
 	@Qualifier("htUserDao")
 	UserDao userDao;
@@ -32,9 +32,10 @@ public class EventService {
 	public void addEventByUser(Integer userId, Event event) throws DaoException {
 		eventDao.addEventToDB(event);
 		for (int i = 0; i < event.getGuests().size(); i++) {
-			Notification notification =  new Notification(Unit.MINUTES, 0, event.getStartDateTime());
+			Notification notification = new Notification(event.getEventId(), event.getGuests().get(i).getUserId(),
+					Unit.MINUTES, 0, event.getStartDateTime());
 			notification.setEvent(eventDao.getEventById(event.getEventId()));
-			notification.setUser(userDao.getUserById(userId));
+			notification.setUser(userDao.getUserById(event.getGuests().get(i).getUserId()));
 			notificationDao.addNotificationToDB(notification);
 		}
 	}

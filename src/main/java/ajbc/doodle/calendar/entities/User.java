@@ -43,7 +43,7 @@ public class User {
 	private SubscriptionData subscriptionData;
 
 	@ManyToMany(mappedBy = "guests", fetch = FetchType.EAGER)
-	Set<Event> userEvents;
+	private Set<Event> userEvents;
 
 	public User(String firstName, String lastName, String email) {
 		super();

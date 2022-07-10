@@ -22,11 +22,11 @@ public class NotificationService {
 	@Autowired
 	@Qualifier("htEventDao")
 	EventDao eventDao;
-	
+
 	@Autowired
 	@Qualifier("htUserDao")
 	UserDao userDao;
-	
+
 	public void addNotificationByEventAndUser(Notification notification) throws DaoException {
 		notificationDao.addNotificationToDB(notification);
 	}
@@ -36,12 +36,19 @@ public class NotificationService {
 		return notification;
 	}
 
-	public Notification updateNotification(Integer id, Notification notification) throws DaoException {
+	public Notification updateNotification(Notification notification) throws DaoException {
+		notification.setEvent(eventDao.getEventById(notification.getEventId()));
+		notification.setUser(userDao.getUserById(notification.getUserId()));
+
 		notificationDao.updateNotification(notification);
-		notification = notificationDao.getNotificationById(id);
+
+		notification = notificationDao.getNotificationById(notification.getNotificationId());
+		System.out.println(notification.getEventId());
+		System.out.println(notification.getUserId());
+
 		return notification;
 	}
-	
+
 	public List<Notification> getAllNotifications() throws DaoException {
 		return notificationDao.getAllNotifications();
 	}

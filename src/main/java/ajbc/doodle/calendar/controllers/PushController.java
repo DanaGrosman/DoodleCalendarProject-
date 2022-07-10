@@ -132,19 +132,19 @@ public class PushController {
 
 	@Scheduled(fixedDelay = 3_000)
 	public void testNotification() {
-		if (this.subscriptions.isEmpty()) {
-			return;
-		}
-		counter++;
-		try {
-			Notification notification = new Notification(counter, Unit.HOURS, 1, LocalDateTime.now());
-			sendPushMessageToAllSubscribers(this.subscriptions,
-					new PushMessage("message: " + counter, notification.toString()));
-			System.out.println(notification);
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		if (this.subscriptions.isEmpty()) {
+//			return;
+//		}
+//		counter++;
+//		try {
+//			Notification notification = new Notification(counter, Unit.HOURS, 1, LocalDateTime.now());
+//			sendPushMessageToAllSubscribers(this.subscriptions,
+//					new PushMessage("message: " + counter, notification.toString()));
+//			System.out.println(notification);
+//		} catch (JsonProcessingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 //
 //	private void sendPushMessageToAllSubscribersWithoutPayload() {
