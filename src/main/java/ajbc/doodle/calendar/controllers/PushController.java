@@ -17,6 +17,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,6 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ajbc.doodle.calendar.Application;
 import ajbc.doodle.calendar.ServerKeys;
 import ajbc.doodle.calendar.daos.DaoException;
+import ajbc.doodle.calendar.entities.Event;
 import ajbc.doodle.calendar.entities.Notification;
 import ajbc.doodle.calendar.entities.SubscriptionData;
 import ajbc.doodle.calendar.entities.Unit;
@@ -51,6 +53,7 @@ import ajbc.doodle.calendar.entities.webpush.PushMessage;
 import ajbc.doodle.calendar.entities.webpush.Subscription;
 import ajbc.doodle.calendar.entities.webpush.SubscriptionEndpoint;
 import ajbc.doodle.calendar.services.CryptoService;
+import ajbc.doodle.calendar.services.NotificationService;
 import ajbc.doodle.calendar.services.UserService;
 
 @RestController
@@ -65,10 +68,14 @@ public class PushController {
 	private final Algorithm jwtAlgorithm;
 	private final ObjectMapper objectMapper;
 	private int counter;
+	private String email;
 
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private NotificationService notificationService;
+	
 	public PushController(ServerKeys serverKeys, CryptoService cryptoService, ObjectMapper objectMapper) {
 		this.serverKeys = serverKeys;
 		this.cryptoService = cryptoService;
@@ -119,25 +126,32 @@ public class PushController {
 
 	@PostMapping("/unsubscribe/{email}")
 	public void unsubscribe(@RequestBody SubscriptionEndpoint subscription,
-			@PathVariable(required = false) String email) {
-		this.subscriptions.remove(subscription.getEndpoint());
-		System.out.println("Subscription with email " + email + " got removed!");
+			@PathVariable(required = false) String email) throws DaoException {
 		// 1 if user exist (by email) set login flag to false
+		User user = userService.getUserByEmail(email);
+		if (user != null) {
+			user.setIsLogged(false);
+			user.setSubscriptionData(null);
+			userService.updateUser(user.getUserId(), user);
+			this.subscriptions.remove(subscription.getEndpoint());
+			this.email = email;
+			System.out.println("Subscription with email " + email + " got removed!");
+		}
 	}
 
 	@PostMapping("/isSubscribed")
 	public boolean isSubscribed(@RequestBody SubscriptionEndpoint subscription) {
 		return this.subscriptions.containsKey(subscription.getEndpoint());
 	}
-
-	@Scheduled(fixedDelay = 3_000)
-	public void testNotification() {
+//
+//	@Scheduled(fixedDelay = 3_000)
+//	public void testNotification() {
 //		if (this.subscriptions.isEmpty()) {
 //			return;
 //		}
 //		counter++;
 //		try {
-//			Notification notification = new Notification(counter, Unit.HOURS, 1, LocalDateTime.now());
+//			Notification notification = new Notification(1000, 1155, Unit.HOURS, 1, LocalDateTime.now());
 //			sendPushMessageToAllSubscribers(this.subscriptions,
 //					new PushMessage("message: " + counter, notification.toString()));
 //			System.out.println(notification);
@@ -145,7 +159,39 @@ public class PushController {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
+//	}
+
+	@Scheduled(fixedDelay = 3_000)
+	public void testNotification() throws DaoException {
+		if (this.subscriptions.isEmpty()) {
+			return;
+		}
+
+		try {
+			System.out.println(email);
+			
+			Integer userId = userService.getUserByEmail(email).getUserId();
+
+			List<Notification> notifications = notificationService.getNotificationByUserId(userId);
+			
+			for (Notification notification : notifications) {
+				sendPushMessageToAllSubscribers(this.subscriptions,
+						new PushMessage("message: " + counter, notification.toString()));
+				System.out.println(notification);
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
+
 //
 //	private void sendPushMessageToAllSubscribersWithoutPayload() {
 //		Set<String> failedSubscriptions = new HashSet<>();

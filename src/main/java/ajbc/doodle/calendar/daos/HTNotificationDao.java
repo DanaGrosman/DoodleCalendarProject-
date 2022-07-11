@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.stereotype.Repository;
@@ -36,6 +37,14 @@ public class HTNotificationDao implements NotificationDao {
 		if (notification == null)
 			throw new DaoException("No such notification in DB");
 		return notification;
+	}
+	
+	@Override
+	public List<Notification> getNotificationByUserId(Integer userId) throws DaoException {
+		DetachedCriteria criteria = DetachedCriteria.forClass(Notification.class);
+		criteria.add(Restrictions.eq("userId", userId));
+		List<Notification> notifications = ((List<Notification>) template.findByCriteria(criteria));
+		return notifications;
 	}
 	
 	@Override

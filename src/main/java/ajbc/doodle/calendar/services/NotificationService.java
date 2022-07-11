@@ -31,9 +31,18 @@ public class NotificationService {
 		notificationDao.addNotificationToDB(notification);
 	}
 
+	public List<Notification> getAllNotifications() throws DaoException {
+		return notificationDao.getAllNotifications();
+	}
+	
 	public Notification getNotificationById(Integer id) throws DaoException {
 		Notification notification = notificationDao.getNotificationById(id);
 		return notification;
+	}
+	
+	public List<Notification> getNotificationByUserId(Integer userId) throws DaoException {
+		List<Notification> notifications = notificationDao.getNotificationByUserId(userId);
+		return notifications;
 	}
 
 	public Notification updateNotification(Notification notification) throws DaoException {
@@ -49,7 +58,4 @@ public class NotificationService {
 		return notification;
 	}
 
-	public List<Notification> getAllNotifications() throws DaoException {
-		return notificationDao.getAllNotifications();
-	}
 }

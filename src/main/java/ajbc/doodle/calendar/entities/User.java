@@ -37,9 +37,9 @@ public class User {
 	private String email;
 	private Boolean isActive; // 0 - active , 1 - not active
 	private Boolean isLogged; // 0 - logout , 1 - login
-	
+
 	@OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "subId")	
+	@JoinColumn(name = "subId")
 	private SubscriptionData subscriptionData;
 
 	@ManyToMany(mappedBy = "guests", fetch = FetchType.EAGER)
@@ -51,5 +51,4 @@ public class User {
 		this.lastName = lastName;
 		this.email = email;
 	}
-
 }
