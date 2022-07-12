@@ -23,6 +23,7 @@ import lombok.ToString;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"event", "user"})
 
 @Entity
 @Table(name = "notifications")
@@ -61,14 +62,6 @@ public class Notification {
 		this.localDateTime = localDateTime;
 	}
 
-	@Override
-	public String toString() {
-		return "Notification [notificationId=" + notificationId + ", eventId=" + eventId + ", userId=" + userId
-				+ ", unit=" + unit + ", quantity=" + quantity + ", localDateTime=" + localDateTime + "]";
-	}
-	
-
-	
 //	
 //	
 //	public Notification(Unit unit, int quantity, LocalDateTime localDateTime) {

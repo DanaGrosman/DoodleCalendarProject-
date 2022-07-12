@@ -23,7 +23,10 @@ public interface NotificationDao {
 		throw new DaoException("Method not implemented");
 	}
 
-	
+	public default List<Notification> getNotificationByEventId(Integer eventId) throws DaoException {
+		throw new DaoException("Method not implemented");
+	}
+
 	@Transactional(readOnly = false)
 	public default void updateNotification(Notification notification) throws DaoException {
 		throw new DaoException("Method not implemented");

@@ -40,9 +40,18 @@ public class EventService {
 		}
 	}
 
+	public List<Event> getAllEvents() throws DaoException {
+		return eventDao.getAllEvents();
+	}
+	
 	public Event getEventById(Integer id) throws DaoException {
 		Event event = eventDao.getEventById(id);
 		return event;
+	}
+	
+	public List<Event> getEventsByUserId(Integer userId) throws DaoException {
+		List<Event> events = eventDao.getEventsByUserId(userId);
+		return events;
 	}
 
 	public Event updateEvent(Integer userId, Event event) throws DaoException {
@@ -52,9 +61,5 @@ public class EventService {
 		} else
 			System.out.println("You are not the owner of this event");
 		return event;
-	}
-
-	public List<Event> getAllEvents() throws DaoException {
-		return eventDao.getAllEvents();
 	}
 }

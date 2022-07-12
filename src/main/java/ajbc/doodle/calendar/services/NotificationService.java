@@ -44,6 +44,11 @@ public class NotificationService {
 		List<Notification> notifications = notificationDao.getNotificationByUserId(userId);
 		return notifications;
 	}
+	
+	public List<Notification> getNotificationByEventId(Integer eventId) throws DaoException {
+		List<Notification> notifications = notificationDao.getNotificationByEventId(eventId);
+		return notifications;
+	}
 
 	public Notification updateNotification(Notification notification) throws DaoException {
 		notification.setEvent(eventDao.getEventById(notification.getEventId()));

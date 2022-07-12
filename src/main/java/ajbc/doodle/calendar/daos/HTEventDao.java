@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.stereotype.Repository;
@@ -23,6 +24,12 @@ public class HTEventDao implements EventDao {
 		template.persist(event);
 		// close session
 	}
+	
+	@Override
+	public List<Event> getAllEvents() throws DaoException {
+		DetachedCriteria criteria = DetachedCriteria.forClass(Event.class);
+		return (List<Event>) template.findByCriteria(criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY));
+	}
 
 	@Override
 	public Event getEventById(Integer id) throws DaoException {
@@ -31,15 +38,19 @@ public class HTEventDao implements EventDao {
 			throw new DaoException("No such event in DB");
 		return event;
 	}
+	
+	@Override
+	public List<Event> getEventsByUserId(Integer userId) throws DaoException {
+		DetachedCriteria criteria = DetachedCriteria.forClass(Event.class);
+		criteria.add(Restrictions.eq("ownerId", userId)); // TODO: userId from the table user_events - not ownerId!
+		List<Event> events = ((List<Event>) template.findByCriteria(criteria));
+		return events;
+	}
 
 	@Override
 	public void updateEvent(Event event) throws DaoException {
 		template.merge(event);
 	}
 
-	@Override
-	public List<Event> getAllEvents() throws DaoException {
-		DetachedCriteria criteria = DetachedCriteria.forClass(Event.class);
-		return (List<Event>) template.findByCriteria(criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY));
-	}
+
 }

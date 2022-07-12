@@ -14,7 +14,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -44,10 +43,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ajbc.doodle.calendar.Application;
 import ajbc.doodle.calendar.ServerKeys;
 import ajbc.doodle.calendar.daos.DaoException;
-import ajbc.doodle.calendar.entities.Event;
 import ajbc.doodle.calendar.entities.Notification;
 import ajbc.doodle.calendar.entities.SubscriptionData;
-import ajbc.doodle.calendar.entities.Unit;
 import ajbc.doodle.calendar.entities.User;
 import ajbc.doodle.calendar.entities.webpush.PushMessage;
 import ajbc.doodle.calendar.entities.webpush.Subscription;
@@ -58,91 +55,91 @@ import ajbc.doodle.calendar.services.UserService;
 
 @RestController
 public class PushController {
-
-	private final ServerKeys serverKeys;
-	private final CryptoService cryptoService;
-	private final Map<String, Subscription> subscriptions = new ConcurrentHashMap<>();
-	private final Map<String, Subscription> subscriptionsAngular = new ConcurrentHashMap<>();
-	private String lastNumbersAPIFact = "";
-	private final HttpClient httpClient;
-	private final Algorithm jwtAlgorithm;
-	private final ObjectMapper objectMapper;
-	private int counter;
-	private String email;
-
-	@Autowired
-	private UserService userService;
-
-	@Autowired
-	private NotificationService notificationService;
+//
+//	private final ServerKeys serverKeys;
+//	private final CryptoService cryptoService;
+//	private final Map<String, Subscription> subscriptions = new ConcurrentHashMap<>();
+////	private final Map<String, Subscription> subscriptionsAngular = new ConcurrentHashMap<>();
+////	private String lastNumbersAPIFact = "";
+//	private final HttpClient httpClient;
+//	private final Algorithm jwtAlgorithm;
+//	private final ObjectMapper objectMapper;
+//	private int counter;
+//	private String email;
+//
+//	@Autowired
+//	private UserService userService;
+//
+//	@Autowired
+//	private NotificationService notificationService;
 	
-	public PushController(ServerKeys serverKeys, CryptoService cryptoService, ObjectMapper objectMapper) {
-		this.serverKeys = serverKeys;
-		this.cryptoService = cryptoService;
-		this.httpClient = HttpClient.newHttpClient();
-		this.objectMapper = objectMapper;
-
-		this.jwtAlgorithm = Algorithm.ECDSA256(this.serverKeys.getPublicKey(), this.serverKeys.getPrivateKey());
-	}
-
-	@GetMapping(path = "/publicSigningKey", produces = "application/octet-stream")
-	public byte[] publicSigningKey() {
-		return this.serverKeys.getPublicKeyUncompressed();
-	}
-
-	@GetMapping(path = "/publicSigningKeyBase64")
-	public String publicSigningKeyBase64() {
-		return this.serverKeys.getPublicKeyBase64();
-	}
-
-	@PostMapping("/subscribe/{email}")
-	@ResponseStatus(HttpStatus.CREATED)
-	public void login(@RequestBody Subscription subscription, @PathVariable(required = false) String email)
-			throws DaoException {
-		// 1 if user exist (by email) set login flag to true
-		User user = userService.getUserByEmail(email);
-
-		if (user != null) {
-			user.setIsLogged(true);
-
-			// 2 for each user save the subscription info 3 things
-			System.out.println("public key:" + subscription.getKeys().getP256dh());
-			System.out.println("auth key: " + subscription.getKeys().getAuth());
-			System.out.println("End Point: " + subscription.getEndpoint());
-
-			String publicKey = subscription.getKeys().getP256dh();
-			String authKey = subscription.getKeys().getAuth();
-			String endPoint = subscription.getEndpoint();
-
-			SubscriptionData subData = new SubscriptionData(publicKey, authKey, endPoint);
-			user.setSubscriptionData(subData);
-			userService.updateUser(user.getUserId(), user);
-			user = userService.getUserById(user.getUserId());
-
-			this.subscriptions.put(subscription.getEndpoint(), subscription);
-			System.out.println("Subscription added with email " + email);
-		}
-	}
-
-	@PostMapping("/unsubscribe/{email}")
-	public void unsubscribe(@RequestBody SubscriptionEndpoint subscription,
-			@PathVariable(required = false) String email) throws DaoException {
-		// 1 if user exist (by email) set login flag to false
-		User user = userService.getUserByEmail(email);
-		if (user != null) {
-			user.setIsLogged(false);
-			user.setSubscriptionData(null);
-			userService.updateUser(user.getUserId(), user);
-			this.subscriptions.remove(subscription.getEndpoint());
-			this.email = email;
-			System.out.println("Subscription with email " + email + " got removed!");
-		}
-	}
-
-	@PostMapping("/isSubscribed")
-	public boolean isSubscribed(@RequestBody SubscriptionEndpoint subscription) {
-		return this.subscriptions.containsKey(subscription.getEndpoint());
-	}
+//	public PushController(ServerKeys serverKeys, CryptoService cryptoService, ObjectMapper objectMapper) {
+//		this.serverKeys = serverKeys;
+//		this.cryptoService = cryptoService;
+//		this.httpClient = HttpClient.newHttpClient();
+//		this.objectMapper = objectMapper;
+//
+//		this.jwtAlgorithm = Algorithm.ECDSA256(this.serverKeys.getPublicKey(), this.serverKeys.getPrivateKey());
+//	}
+//
+//	@GetMapping(path = "/publicSigningKey", produces = "application/octet-stream")
+//	public byte[] publicSigningKey() {
+//		return this.serverKeys.getPublicKeyUncompressed();
+//	}
+//
+//	@GetMapping(path = "/publicSigningKeyBase64")
+//	public String publicSigningKeyBase64() {
+//		return this.serverKeys.getPublicKeyBase64();
+//	}
+//
+//	@PostMapping("/subscribe/{email}")
+//	@ResponseStatus(HttpStatus.CREATED)
+//	public void login(@RequestBody Subscription subscription, @PathVariable(required = false) String email)
+//			throws DaoException {
+//		// 1 if user exist (by email) set login flag to true
+//		User user = userService.getUserByEmail(email);
+//
+//		if (user != null) {
+//			user.setIsLogged(true);
+//
+//			// 2 for each user save the subscription info 3 things
+//			System.out.println("public key:" + subscription.getKeys().getP256dh());
+//			System.out.println("auth key: " + subscription.getKeys().getAuth());
+//			System.out.println("End Point: " + subscription.getEndpoint());
+//
+//			String publicKey = subscription.getKeys().getP256dh();
+//			String authKey = subscription.getKeys().getAuth();
+//			String endPoint = subscription.getEndpoint();
+//
+//			SubscriptionData subData = new SubscriptionData(publicKey, authKey, endPoint);
+//			user.setSubscriptionData(subData);
+//			userService.updateUser(user.getUserId(), user);
+//			user = userService.getUserById(user.getUserId());
+//
+//			this.subscriptions.put(subscription.getEndpoint(), subscription);
+//			System.out.println("Subscription added with email " + email);
+//		}
+//	}
+//
+//	@PostMapping("/unsubscribe/{email}")
+//	public void unsubscribe(@RequestBody SubscriptionEndpoint subscription,
+//			@PathVariable(required = false) String email) throws DaoException {
+//		// 1 if user exist (by email) set login flag to false
+//		User user = userService.getUserByEmail(email);
+//		if (user != null) {
+//			user.setIsLogged(false);
+//			user.setSubscriptionData(null);
+//			userService.updateUser(user.getUserId(), user);
+//			this.subscriptions.remove(subscription.getEndpoint());
+//			this.email = email;
+//			System.out.println("Subscription with email " + email + " got removed!");
+//		}
+//	}
+//
+//	@PostMapping("/isSubscribed")
+//	public boolean isSubscribed(@RequestBody SubscriptionEndpoint subscription) {
+//		return this.subscriptions.containsKey(subscription.getEndpoint());
+//	}
 //
 //	@Scheduled(fixedDelay = 3_000)
 //	public void testNotification() {
@@ -161,36 +158,36 @@ public class PushController {
 //		}
 //	}
 
-	@Scheduled(fixedDelay = 3_000)
-	public void testNotification() throws DaoException {
-		if (this.subscriptions.isEmpty()) {
-			return;
-		}
-
-		try {
-			System.out.println(email);
-			
-			Integer userId = userService.getUserByEmail(email).getUserId();
-
-			List<Notification> notifications = notificationService.getNotificationByUserId(userId);
-			
-			for (Notification notification : notifications) {
-				sendPushMessageToAllSubscribers(this.subscriptions,
-						new PushMessage("message: " + counter, notification.toString()));
-				System.out.println(notification);
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	@Scheduled(fixedDelay = 3_000)
+//	public void testNotification() throws DaoException {
+//		if (this.subscriptions.isEmpty()) {
+//			return;
+//		}
+//
+//		try {
+//			System.out.println(email);
+//			
+//			Integer userId = userService.getUserByEmail(email).getUserId();
+//
+//			List<Notification> notifications = notificationService.getNotificationByUserId(userId);
+//			
+//			for (Notification notification : notifications) {
+//				sendPushMessageToAllSubscribers(this.subscriptions,
+//						new PushMessage("message: " + counter, notification.toString()));
+//				System.out.println(notification);
+//				try {
+//					Thread.sleep(2000);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//			
+//		} catch (JsonProcessingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 
 //
 //	private void sendPushMessageToAllSubscribersWithoutPayload() {
@@ -204,91 +201,91 @@ public class PushController {
 //		failedSubscriptions.forEach(this.subscriptions::remove);
 //	}
 
-	private void sendPushMessageToAllSubscribers(Map<String, Subscription> subs, Object message)
-			throws JsonProcessingException {
-
-		Set<String> failedSubscriptions = new HashSet<>();
-
-		for (Subscription subscription : subs.values()) {
-			try {
-				byte[] result = this.cryptoService.encrypt(this.objectMapper.writeValueAsString(message),
-						subscription.getKeys().getP256dh(), subscription.getKeys().getAuth(), 0);
-				boolean remove = sendPushMessage(subscription, result);
-				if (remove) {
-					failedSubscriptions.add(subscription.getEndpoint());
-				}
-			} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidAlgorithmParameterException
-					| IllegalStateException | InvalidKeySpecException | NoSuchPaddingException
-					| IllegalBlockSizeException | BadPaddingException e) {
-				Application.logger.error("send encrypted message", e);
-			}
-		}
-
-		failedSubscriptions.forEach(subs::remove);
-	}
-
-	/**
-	 * @return true if the subscription is no longer valid and can be removed, false
-	 *         if everything is okay
-	 */
-	private boolean sendPushMessage(Subscription subscription, byte[] body) {
-		String origin = null;
-		try {
-			URL url = new URL(subscription.getEndpoint());
-			origin = url.getProtocol() + "://" + url.getHost();
-		} catch (MalformedURLException e) {
-			Application.logger.error("create origin", e);
-			return true;
-		}
-
-		Date today = new Date();
-		Date expires = new Date(today.getTime() + 12 * 60 * 60 * 1000);
-
-		String token = JWT.create().withAudience(origin).withExpiresAt(expires)
-				.withSubject("mailto:example@example.com").sign(this.jwtAlgorithm);
-
-		URI endpointURI = URI.create(subscription.getEndpoint());
-
-		Builder httpRequestBuilder = HttpRequest.newBuilder();
-		if (body != null) {
-			httpRequestBuilder.POST(BodyPublishers.ofByteArray(body)).header("Content-Type", "application/octet-stream")
-					.header("Content-Encoding", "aes128gcm");
-		} else {
-			httpRequestBuilder.POST(BodyPublishers.ofString(""));
-			// httpRequestBuilder.header("Content-Length", "0");
-		}
-
-		HttpRequest request = httpRequestBuilder.uri(endpointURI).header("TTL", "180")
-				.header("Authorization", "vapid t=" + token + ", k=" + this.serverKeys.getPublicKeyBase64()).build();
-		try {
-			HttpResponse<Void> response = this.httpClient.send(request, BodyHandlers.discarding());
-
-			switch (response.statusCode()) {
-			case 201:
-				Application.logger.info("Push message successfully sent: {}", subscription.getEndpoint());
-				break;
-			case 404:
-			case 410:
-				Application.logger.warn("Subscription not found or gone: {}", subscription.getEndpoint());
-				// remove subscription from our collection of subscriptions
-				return true;
-			case 429:
-				Application.logger.error("Too many requests: {}", request);
-				break;
-			case 400:
-				Application.logger.error("Invalid request: {}", request);
-				break;
-			case 413:
-				Application.logger.error("Payload size too large: {}", request);
-				break;
-			default:
-				Application.logger.error("Unhandled status code: {} / {}", response.statusCode(), request);
-			}
-		} catch (IOException | InterruptedException e) {
-			Application.logger.error("send push message", e);
-		}
-
-		return false;
-	}
+//	private void sendPushMessageToAllSubscribers(Map<String, Subscription> subs, Object message)
+//			throws JsonProcessingException {
+//
+//		Set<String> failedSubscriptions = new HashSet<>();
+//
+//		for (Subscription subscription : subs.values()) {
+//			try {
+//				byte[] result = this.cryptoService.encrypt(this.objectMapper.writeValueAsString(message),
+//						subscription.getKeys().getP256dh(), subscription.getKeys().getAuth(), 0);
+//				boolean remove = sendPushMessage(subscription, result);
+//				if (remove) {
+//					failedSubscriptions.add(subscription.getEndpoint());
+//				}
+//			} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidAlgorithmParameterException
+//					| IllegalStateException | InvalidKeySpecException | NoSuchPaddingException
+//					| IllegalBlockSizeException | BadPaddingException e) {
+//				Application.logger.error("send encrypted message", e);
+//			}
+//		}
+//
+//		failedSubscriptions.forEach(subs::remove);
+//	}
+//
+//	/**
+//	 * @return true if the subscription is no longer valid and can be removed, false
+//	 *         if everything is okay
+//	 */
+//	private boolean sendPushMessage(Subscription subscription, byte[] body) {
+//		String origin = null;
+//		try {
+//			URL url = new URL(subscription.getEndpoint());
+//			origin = url.getProtocol() + "://" + url.getHost();
+//		} catch (MalformedURLException e) {
+//			Application.logger.error("create origin", e);
+//			return true;
+//		}
+//
+//		Date today = new Date();
+//		Date expires = new Date(today.getTime() + 12 * 60 * 60 * 1000);
+//
+//		String token = JWT.create().withAudience(origin).withExpiresAt(expires)
+//				.withSubject("mailto:example@example.com").sign(this.jwtAlgorithm);
+//
+//		URI endpointURI = URI.create(subscription.getEndpoint());
+//
+//		Builder httpRequestBuilder = HttpRequest.newBuilder();
+//		if (body != null) {
+//			httpRequestBuilder.POST(BodyPublishers.ofByteArray(body)).header("Content-Type", "application/octet-stream")
+//					.header("Content-Encoding", "aes128gcm");
+//		} else {
+//			httpRequestBuilder.POST(BodyPublishers.ofString(""));
+//			// httpRequestBuilder.header("Content-Length", "0");
+//		}
+//
+//		HttpRequest request = httpRequestBuilder.uri(endpointURI).header("TTL", "180")
+//				.header("Authorization", "vapid t=" + token + ", k=" + this.serverKeys.getPublicKeyBase64()).build();
+//		try {
+//			HttpResponse<Void> response = this.httpClient.send(request, BodyHandlers.discarding());
+//
+//			switch (response.statusCode()) {
+//			case 201:
+//				Application.logger.info("Push message successfully sent: {}", subscription.getEndpoint());
+//				break;
+//			case 404:
+//			case 410:
+//				Application.logger.warn("Subscription not found or gone: {}", subscription.getEndpoint());
+//				// remove subscription from our collection of subscriptions
+//				return true;
+//			case 429:
+//				Application.logger.error("Too many requests: {}", request);
+//				break;
+//			case 400:
+//				Application.logger.error("Invalid request: {}", request);
+//				break;
+//			case 413:
+//				Application.logger.error("Payload size too large: {}", request);
+//				break;
+//			default:
+//				Application.logger.error("Unhandled status code: {} / {}", response.statusCode(), request);
+//			}
+//		} catch (IOException | InterruptedException e) {
+//			Application.logger.error("send push message", e);
+//		}
+//
+//		return false;
+//	}
 
 }

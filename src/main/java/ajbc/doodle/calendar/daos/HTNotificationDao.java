@@ -48,6 +48,14 @@ public class HTNotificationDao implements NotificationDao {
 	}
 	
 	@Override
+	public List<Notification> getNotificationByEventId(Integer eventId) throws DaoException {
+		DetachedCriteria criteria = DetachedCriteria.forClass(Notification.class);
+		criteria.add(Restrictions.eq("eventId", eventId));
+		List<Notification> notifications = ((List<Notification>) template.findByCriteria(criteria));
+		return notifications;
+	}
+	
+	@Override
 	public void updateNotification(Notification notification) throws DaoException {
 		template.merge(notification);
 	}
