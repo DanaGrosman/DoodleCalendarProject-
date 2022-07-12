@@ -21,6 +21,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -31,9 +32,11 @@ import ajbc.doodle.calendar.Application;
 import ajbc.doodle.calendar.ServerKeys;
 import ajbc.doodle.calendar.entities.User;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
-@Component
+@Setter
+@Service
 public class MessagePushService {
 
 	private final CryptoService cryptoService;
@@ -41,7 +44,7 @@ public class MessagePushService {
 	private final ServerKeys serverKeys;
 	private final HttpClient httpClient;
 	private final Algorithm jwtAlgorithm;
-
+	
 	public MessagePushService(CryptoService cryptoService, ObjectMapper objectMapper, ServerKeys serverKeys) {
 		this.cryptoService = cryptoService;
 		this.objectMapper = objectMapper;
@@ -60,6 +63,8 @@ public class MessagePushService {
 	}
 
 	public boolean sendPushMessage(User user, byte[] body) {
+
+		
 		String origin = null;
 		try {
 			URL url = new URL(user.getSubscriptionData().getEndPoint());

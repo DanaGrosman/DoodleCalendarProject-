@@ -23,7 +23,7 @@ import lombok.ToString;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"event", "user"})
+@ToString(exclude = { "event", "user" })
 
 @Entity
 @Table(name = "notifications")
@@ -35,15 +35,15 @@ public class Notification {
 
 	@Column(name = "eventId", insertable = false, updatable = false)
 	private Integer eventId;
-	
+
 	@Column(name = "userId", insertable = false, updatable = false)
 	private Integer userId;
-	
+
 	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "eventId")
 	private Event event;
-	
+
 	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "userId")
@@ -52,7 +52,9 @@ public class Notification {
 	private Unit unit;
 	private int quantity;
 	private LocalDateTime localDateTime;
-	
+	private boolean isActive;
+	private boolean isAlerted;
+
 	public Notification(Integer eventId, Integer userId, Unit unit, int quantity, LocalDateTime localDateTime) {
 		super();
 		this.eventId = eventId;
@@ -60,6 +62,10 @@ public class Notification {
 		this.unit = unit;
 		this.quantity = quantity;
 		this.localDateTime = localDateTime;
+	}
+
+	public LocalDateTime computeAlertTime() {
+		return (unit == Unit.HOURS) ? this.localDateTime.minusHours(quantity) : this.localDateTime.minusMinutes(quantity);
 	}
 
 //	

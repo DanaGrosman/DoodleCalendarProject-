@@ -32,7 +32,6 @@ import ajbc.doodle.calendar.daos.DaoException;
 import ajbc.doodle.calendar.entities.ErrorMessage;
 import ajbc.doodle.calendar.entities.SubscriptionData;
 import ajbc.doodle.calendar.entities.User;
-import ajbc.doodle.calendar.entities.webpush.PushMessage;
 import ajbc.doodle.calendar.entities.webpush.Subscription;
 import ajbc.doodle.calendar.entities.webpush.SubscriptionEndpoint;
 import ajbc.doodle.calendar.services.MessagePushService;
@@ -126,7 +125,9 @@ public class UserController {
 	@PostMapping("/subscribe/{email}")
 	@ResponseStatus(HttpStatus.CREATED)
 	public void login(@RequestBody Subscription subscription, @PathVariable(required = false) String email)
-			throws DaoException, InvalidKeyException, JsonProcessingException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+			throws DaoException, InvalidKeyException, JsonProcessingException, NoSuchAlgorithmException,
+			InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException,
+			IllegalBlockSizeException, BadPaddingException {
 		// 1 if user exist (by email) set login flag to true
 		User user = userService.getUserByEmail(email);
 
@@ -147,8 +148,6 @@ public class UserController {
 			userService.updateUser(user.getUserId(), user);
 			user = userService.getUserById(user.getUserId());
 
-			messagePushService.sendPushMessage(user, messagePushService.encryptMessage(user, new PushMessage("message: ", "hello")));
-			
 			System.out.println("Subscription added with email " + email);
 		}
 	}
@@ -163,6 +162,7 @@ public class UserController {
 			user.setSubscriptionData(null);
 			userService.updateUser(user.getUserId(), user);
 			System.out.println("Subscription with email " + email + " got removed!");
+
 		}
 	}
 

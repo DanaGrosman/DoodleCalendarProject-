@@ -29,7 +29,7 @@ public class UserService {
 		return userDao.getAllUsers();
 	}
 
-	public User getUserById(Integer id) throws DaoException {
+	public User getUserById(Integer id) throws DaoException {	
 		User user = userDao.getUserById(id);
 		return user;
 	}
