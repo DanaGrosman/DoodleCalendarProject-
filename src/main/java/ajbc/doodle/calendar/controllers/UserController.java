@@ -180,4 +180,42 @@ public class UserController {
 		}
 		return false;
 	}
+	
+	@RequestMapping(method = RequestMethod.PUT, path = "/softDelete")
+	public ResponseEntity<?> softDeleteUsers(@RequestBody List<Integer> usersIds) {
+
+		try {
+			List<User> deletedUsers = new ArrayList<User>();
+			for (int i = 0; i < usersIds.size(); i++) {
+				User user = userService.softDeleteUser(usersIds.get(i));
+				deletedUsers.add(user);
+			}
+
+			return ResponseEntity.status(HttpStatus.OK).body(deletedUsers);
+		} catch (DaoException e) {
+			ErrorMessage errorMessage = new ErrorMessage();
+			errorMessage.setData(e.getMessage());
+			errorMessage.setMessage("failed to soft delete user in db");
+			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
+		}
+	}
+	
+	@RequestMapping(method = RequestMethod.DELETE, path = "/hardDelete")
+	public ResponseEntity<?> hardDeleteUsers(@RequestBody List<Integer> usersIds) {
+
+		try {
+			List<User> deletedUsers = new ArrayList<User>();
+			for (int i = 0; i < usersIds.size(); i++) {
+				User user = userService.hardDeleteUser(usersIds.get(i));
+				deletedUsers.add(user);
+			}
+
+			return ResponseEntity.status(HttpStatus.OK).body(deletedUsers);
+		} catch (DaoException e) {
+			ErrorMessage errorMessage = new ErrorMessage();
+			errorMessage.setData(e.getMessage());
+			errorMessage.setMessage("failed to delete user in db");
+			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
+		}
+	}
 }

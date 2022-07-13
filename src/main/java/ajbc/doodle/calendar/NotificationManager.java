@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import ajbc.doodle.calendar.daos.DaoException;
 import ajbc.doodle.calendar.entities.Notification;
@@ -68,6 +69,7 @@ public class NotificationManager implements Runnable {
 		}
 	}
 
+	@Transactional
 	@Override
 	public void run() {
 		// assign thread to send the next notification (top queue) if the user is

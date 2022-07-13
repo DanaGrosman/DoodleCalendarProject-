@@ -41,5 +41,10 @@ public interface UserDao {
 	public default void updateUser(User user) throws DaoException {
 		throw new DaoException("Method not implemented");
 	}
+	
+	@Transactional(readOnly = false)
+	public default void deleteUser(User user) throws DaoException {
+		throw new DaoException("Method not implemented");
+	}
 
 }

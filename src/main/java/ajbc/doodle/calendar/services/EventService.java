@@ -109,7 +109,6 @@ public class EventService {
 
 	public Event hardDeleteEvent(Integer eventId) throws DaoException {
 		Event event = eventDao.getEventById(eventId);
-		eventDao.deleteEvent(event);
 		
 		List<Notification> notifications = new ArrayList<Notification>();
 		notifications.addAll(event.getNotifications());
@@ -117,6 +116,8 @@ public class EventService {
 		for (int i = 0; i < notifications.size(); i++) {
 			notificationDao.deleteNotification(notifications.get(i));
 		}
+		
+		eventDao.deleteEvent(event);
 		
 		return event;
 	}

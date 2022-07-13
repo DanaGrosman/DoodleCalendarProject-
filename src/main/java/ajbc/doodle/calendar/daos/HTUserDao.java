@@ -1,8 +1,6 @@
 package ajbc.doodle.calendar.daos;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.DetachedCriteria;
@@ -11,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.stereotype.Repository;
 
-import ajbc.doodle.calendar.entities.Event;
-import ajbc.doodle.calendar.entities.Notification;
 import ajbc.doodle.calendar.entities.User;
 
 @SuppressWarnings("unchecked")
@@ -41,28 +37,7 @@ public class HTUserDao implements UserDao {
 		DetachedCriteria criteria = DetachedCriteria.forClass(User.class);
 		List<User> users = (List<User>) template
 				.findByCriteria(criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY));
-//		for (int i = 0; i < users.size(); i++) {
-//			for (Event event : users.get(i).getUserEvents()) {
-//				filterNotificationsByUser(event, users.get(i).getUserId());
-//			}
-//		}
 		return users;
-	}
-
-	private void filterNotificationsByUser(Event event, Integer userId) {
-		Set<Notification> nots = event.getNotifications();
-		System.out.println("-------" + userId);
-
-		System.out.println("----before not id's");
-		nots.forEach(t -> System.out.println(t.getUserId()));
-		
-		nots = nots.stream().filter(t -> t.getUserId().equals(userId)).collect(Collectors.toSet());
-		
-		System.out.println("----after not id's");
-		nots.forEach(t -> System.out.println(t.getUserId()));
-		
-		
-		event.setNotifications(nots.stream().filter(t -> t.getUserId().equals(userId)).collect(Collectors.toSet()));
 	}
 
 	@Override
@@ -92,5 +67,9 @@ public class HTUserDao implements UserDao {
 	public void updateUser(User user) throws DaoException {
 		template.merge(user);
 	}
-
+	
+	@Override
+	public void deleteUser(User user) throws DaoException {
+		template.delete(user);
+	}
 }
