@@ -1,5 +1,6 @@
 package ajbc.doodle.calendar.daos;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.hibernate.Criteria;
@@ -42,11 +43,20 @@ public class HTEventDao implements EventDao {
 	@Override
 	public List<Event> getEventsByUserId(Integer userId) throws DaoException {
 		DetachedCriteria criteria = DetachedCriteria.forClass(Event.class);
-		criteria.add(Restrictions.eq("ownerId", userId)); // TODO: userId from the table user_events - not ownerId!
+		criteria.add(Restrictions.eq("ownerId", userId));
 		List<Event> events = ((List<Event>) template.findByCriteria(criteria));
 		return events;
 	}
-
+	
+	@Override
+	public List<Event> getEventsByRange(LocalDateTime start, LocalDateTime end) throws DaoException {
+		DetachedCriteria criteria = DetachedCriteria.forClass(Event.class);
+		criteria.add(Restrictions.ge("startDateTime", start));
+		criteria.add(Restrictions.le("endDateTime", end));
+		List<Event> events = ((List<Event>) template.findByCriteria(criteria));
+		return events;
+	}
+	
 	@Override
 	public void updateEvent(Event event) throws DaoException {
 		template.merge(event);

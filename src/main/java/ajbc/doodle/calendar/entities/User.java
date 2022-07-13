@@ -13,6 +13,9 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,6 +45,7 @@ public class User {
 	@JoinColumn(name = "subId")
 	private SubscriptionData subscriptionData;
 
+	@JsonProperty(access = Access.READ_ONLY)
 	@ManyToMany(mappedBy = "guests", fetch = FetchType.EAGER)
 	private Set<Event> userEvents;
 
@@ -50,5 +54,7 @@ public class User {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
+		this.isActive = true;
+		this.isLogged = false;
 	}
 }

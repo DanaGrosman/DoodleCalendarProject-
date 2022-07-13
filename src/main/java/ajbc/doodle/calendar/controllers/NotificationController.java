@@ -39,7 +39,25 @@ public class NotificationController {
 	NotificationManager notificationManager;
 
 	@PostMapping("/{userId}/{eventId}")
-	public ResponseEntity<?> addNotification(@RequestBody List<Notification> notifications,
+	public ResponseEntity<?> addNotification(@RequestBody Notification notification, @PathVariable Integer userId,
+			@PathVariable Integer eventId) {
+		try {
+			notification.setEventId(eventId);
+			notification.setUserId(userId);
+			notificationService.addNotification(notification);
+			notification = notificationService.getNotificationById(notification.getNotificationId());
+			notificationManager.addNotification(notification);
+			return ResponseEntity.status(HttpStatus.CREATED).body(notification);
+		} catch (DaoException e) {
+			ErrorMessage errorMessage = new ErrorMessage();
+			errorMessage.setData(e.getMessage());
+			errorMessage.setMessage("failed to add notification to db");
+			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
+		}
+	}
+
+	@PostMapping("/{userId}/{eventId}/addList")
+	public ResponseEntity<?> addNotifications(@RequestBody List<Notification> notifications,
 			@PathVariable Integer userId, @PathVariable Integer eventId) {
 		try {
 			List<Notification> addedNotifications = new ArrayList<Notification>();
@@ -96,14 +114,33 @@ public class NotificationController {
 		}
 	}
 
-	@RequestMapping(method = RequestMethod.PUT)
-	public ResponseEntity<?> updateNotification(@RequestBody List<Notification> notifications) {
+	@RequestMapping(method = RequestMethod.PUT, path = "{id}")
+	public ResponseEntity<?> updateNotification(@RequestBody Notification notification, @PathVariable Integer id) {
+		try {
+			if (notification.getAlertTime().isAfter(LocalDateTime.now()))
+				notification.setAlerted(false);
+			notification.setNotificationId(id);
+			notificationService.updateNotification(notification);
+			notification = notificationService.getNotificationById(notification.getNotificationId());
+
+			return ResponseEntity.status(HttpStatus.OK).body(notification);
+		} catch (DaoException e) {
+			ErrorMessage errorMessage = new ErrorMessage();
+			errorMessage.setData(e.getMessage());
+			errorMessage.setMessage("failed to update user in db");
+			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
+		}
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, path = "/updateList")
+	public ResponseEntity<?> updateListNotifications(@RequestBody List<Notification> notifications) {
 		try {
 			List<Notification> addedNotifications = new ArrayList<Notification>();
 
 			for (int i = 0; i < notifications.size(); i++) {
 				if (notifications.get(i).getAlertTime().isAfter(LocalDateTime.now()))
 					notifications.get(i).setAlerted(false);
+
 				notificationService.updateNotification(notifications.get(i));
 				Notification notification = notificationService
 						.getNotificationById(notifications.get(i).getNotificationId());
@@ -137,7 +174,7 @@ public class NotificationController {
 			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
 		}
 	}
-	
+
 	@RequestMapping(method = RequestMethod.DELETE, path = "/hardDelete")
 	public ResponseEntity<?> hardDeleteNotifications(@RequestBody List<Integer> notificationIds) {
 

@@ -1,5 +1,6 @@
 package ajbc.doodle.calendar.daos;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,10 @@ public interface EventDao {
 		throw new DaoException("Method not implemented");
 	}
 	
+	public default List<Event> getEventsByRange(LocalDateTime start, LocalDateTime end) throws DaoException {
+		throw new DaoException("Method not implemented");
+	}
+
 	@Transactional(readOnly = false)
 	public default void updateEvent(Event event) throws DaoException {
 		throw new DaoException("Method not implemented");

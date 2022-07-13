@@ -1,6 +1,9 @@
 package ajbc.doodle.calendar.services;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,13 +34,14 @@ public class EventService {
 	public void addEventByUser(Integer userId, Event event) throws DaoException {
 		event.setOwnerId(userId);
 		eventDao.addEventToDB(event);
-		for (int i = 0; i < event.getGuests().size(); i++) {
-			Notification notification = new Notification(event.getEventId(), event.getGuests().get(i).getUserId(),
-					event.getStartDateTime());
-			notification.setEvent(eventDao.getEventById(event.getEventId()));
-			notification.setUser(userDao.getUserById(event.getGuests().get(i).getUserId()));
-			notificationDao.addNotificationToDB(notification);
-		}
+		if (event.getGuests() != null)
+			for (int i = 0; i < event.getGuests().size(); i++) {
+				Notification notification = new Notification(event.getEventId(), event.getGuests().get(i).getUserId(),
+						event.getStartDateTime());
+				notification.setEvent(eventDao.getEventById(event.getEventId()));
+				notification.setUser(userDao.getUserById(event.getGuests().get(i).getUserId()));
+				notificationDao.addNotificationToDB(notification);
+			}
 	}
 
 	public List<Event> getAllEvents() throws DaoException {
@@ -50,7 +54,32 @@ public class EventService {
 	}
 
 	public List<Event> getEventsByUserId(Integer userId) throws DaoException {
-		List<Event> events = eventDao.getEventsByUserId(userId);
+		List<Event> events = new ArrayList<Event>();
+		events.addAll(userDao.getUserById(userId).getUserEvents());
+		return events;
+	}
+
+	public List<Event> getUpcomingEventsByUserId(Integer userId) throws DaoException {
+		List<Event> events = getEventsByUserId(userId);
+		events = events.stream().filter(e -> e.getStartDateTime().isAfter(LocalDateTime.now()))
+				.collect(Collectors.toList());
+		for (int i = 0; i < events.size(); i++) {
+			events.get(i).setGuests(null);
+		}
+		return events;
+	}
+
+	public List<Event> getEventsByRange(LocalDateTime start, LocalDateTime end) throws DaoException {
+		List<Event> events = eventDao.getEventsByRange(start, end);
+		return events;
+	}
+
+	public List<Event> getEventsByRangeAndUserId(Integer userId, LocalDateTime start, LocalDateTime end)
+			throws DaoException {
+		List<Event> events = getEventsByUserId(userId);
+		events = events.stream()
+				.filter(e -> (e.getStartDateTime().isAfter(start) && e.getStartDateTime().isBefore(end)))
+				.collect(Collectors.toList());
 		return events;
 	}
 
@@ -62,4 +91,5 @@ public class EventService {
 			System.out.println("You are not the owner of this event");
 		return event;
 	}
+
 }

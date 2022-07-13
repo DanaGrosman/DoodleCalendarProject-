@@ -30,6 +30,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import ajbc.doodle.calendar.daos.DaoException;
 import ajbc.doodle.calendar.entities.ErrorMessage;
+import ajbc.doodle.calendar.entities.Event;
 import ajbc.doodle.calendar.entities.SubscriptionData;
 import ajbc.doodle.calendar.entities.User;
 import ajbc.doodle.calendar.entities.webpush.Subscription;
@@ -49,33 +50,26 @@ public class UserController {
 
 	@PostMapping
 	public ResponseEntity<?> createUsers(@RequestBody User user) {
-//		List<User> addedUsers = new ArrayList<User>();
 		try {
-//			for (int i = 0; i < users.size(); i++) {
 			userService.addUser(user);
 			user = userService.getUserById(user.getUserId());
 			return ResponseEntity.status(HttpStatus.CREATED).body(user);
-
-//			}
 		} catch (DaoException e) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e);
 		}
 	}
 
-//	@GetMapping
-//	public ResponseEntity<?> getUsers() {
-//		try {
-//			List<User> users = userService.getAllUsers();
-//			return ResponseEntity.ok(users);
-//		} catch (DaoException e) {
-//			return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e);
-//		}
-//	}
-
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getUserById(@PathVariable Integer id) {
 		try {
 			User user = userService.getUserById(id);
+
+			List<Event> events = new ArrayList<Event>();
+			events.addAll(user.getUserEvents());
+			for (int j = 0; j < events.size(); j++) {
+				events.get(j).setGuests(null);
+			}
+
 			return ResponseEntity.status(HttpStatus.OK).body(user);
 		} catch (DaoException e) {
 			ErrorMessage errorMessage = new ErrorMessage();
@@ -97,6 +91,15 @@ public class UserController {
 				users = userService.getUsersByEventId(Integer.valueOf(map.get("eventId")));
 			else
 				users = userService.getAllUsers();
+
+			for (int i = 0; i < users.size(); i++) {
+				List<Event> events = new ArrayList<Event>();
+				events.addAll(users.get(i).getUserEvents());
+				for (int j = 0; j < events.size(); j++) {
+					events.get(j).setGuests(null);
+				}
+			}
+
 			return ResponseEntity.status(HttpStatus.OK).body(users);
 		} catch (DaoException e) {
 			ErrorMessage errorMessage = new ErrorMessage();

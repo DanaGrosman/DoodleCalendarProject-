@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -14,6 +15,11 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,6 +33,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString(exclude = "guests")
 
+@JsonInclude(Include.NON_NULL)
 @Entity
 @Table(name = "events")
 public class Event {
@@ -42,6 +49,7 @@ public class Event {
 	private LocalDateTime endDateTime;
 	private String description;
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@ManyToMany
 	@JoinTable(name = "user_events", joinColumns = @JoinColumn(name = "eventId"), inverseJoinColumns = @JoinColumn(name = "userId"))
 	private List<User> guests;

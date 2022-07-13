@@ -19,7 +19,9 @@ import ajbc.doodle.calendar.entities.User;
 import ajbc.doodle.calendar.services.MessagePushService;
 import ajbc.doodle.calendar.services.NotificationService;
 import ajbc.doodle.calendar.services.UserService;
+import lombok.Getter;
 
+@Getter
 @Component
 public class NotificationManager implements Runnable {
 
@@ -109,7 +111,7 @@ public class NotificationManager implements Runnable {
 
 	}
 
-	private long getDelay(LocalDateTime time) {
+	long getDelay(LocalDateTime time) {
 		return ChronoUnit.SECONDS.between(LocalDateTime.now(), time);
 	}
 

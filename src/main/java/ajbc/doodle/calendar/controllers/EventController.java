@@ -1,5 +1,6 @@
 package ajbc.doodle.calendar.controllers;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,11 +21,20 @@ import org.springframework.web.bind.annotation.RestController;
 import ajbc.doodle.calendar.daos.DaoException;
 import ajbc.doodle.calendar.entities.ErrorMessage;
 import ajbc.doodle.calendar.entities.Event;
+import ajbc.doodle.calendar.entities.Notification;
 import ajbc.doodle.calendar.services.EventService;
 
 @RestController
 @RequestMapping("events")
 public class EventController {
+
+	private static final String MINUTES = "minutes";
+	private static final String HOURS = "hours";
+	private static final String FAILED_TO_FIND = "failed to find event in db";
+	private static final String FAILED_TO_UPDATE = "failed to update event in db";
+	private static final String USER_ID = "userId";
+	private static final String END = "end";
+	private static final String START = "start";
 
 	@Autowired
 	private EventService eventService;
@@ -34,8 +44,25 @@ public class EventController {
 		try {
 			eventService.addEventByUser(userId, event);
 			event = eventService.getEventById(event.getEventId());
-			event.setGuests(null);
+//			event.setGuests(null);
 			return ResponseEntity.status(HttpStatus.CREATED).body(event);
+		} catch (DaoException e) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e);
+		}
+	}
+
+	@PostMapping("/addList")
+	public ResponseEntity<?> addListOfEvents(@RequestBody List<Event> events) {
+		try {
+			List<Event> addedEvents = new ArrayList<Event>();
+
+			for (int i = 0; i < events.size(); i++) {
+				eventService.addEventByUser(events.get(i).getOwnerId(), events.get(i));
+				Event event = eventService.getEventById(events.get(i).getEventId());
+				event.setGuests(null);
+				addedEvents.add(event);
+			}
+			return ResponseEntity.status(HttpStatus.CREATED).body(addedEvents);
 		} catch (DaoException e) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e);
 		}
@@ -47,25 +74,67 @@ public class EventController {
 		List<Event> events = new ArrayList<Event>();
 
 		try {
-			if (keys.contains("userId"))
-				events = eventService.getEventsByUserId(Integer.valueOf(map.get("userId")));
+			if (keys.contains(START) && keys.contains(END) && keys.contains(USER_ID)) {
+				LocalDateTime start = LocalDateTime.parse(map.get(START));
+				LocalDateTime end = LocalDateTime.parse(map.get(END));
+				events = eventService.getEventsByRangeAndUserId(Integer.valueOf(map.get(USER_ID)), start, end);
+
+			} else if (keys.contains(USER_ID) && keys.contains(HOURS)) {
+				events = eventService.getEventsByRangeAndUserId(Integer.valueOf(map.get(USER_ID)), LocalDateTime.now(),
+						LocalDateTime.now().plusHours(Integer.valueOf(map.get(HOURS))));
+			}
+
+			else if (keys.contains(USER_ID) && keys.contains(MINUTES)) {
+				events = eventService.getEventsByRangeAndUserId(Integer.valueOf(map.get(USER_ID)), LocalDateTime.now(),
+						LocalDateTime.now().plusMinutes(Integer.valueOf(map.get(MINUTES))));
+
+			} else if (keys.contains(USER_ID))
+				events = eventService.getEventsByUserId(Integer.valueOf(map.get(USER_ID)));
+
+			else if (keys.contains(START) && keys.contains(END)) {
+				LocalDateTime start = LocalDateTime.parse(map.get(START));
+				LocalDateTime end = LocalDateTime.parse(map.get(END));
+				events = eventService.getEventsByRange(start, end);
+			}
+
 			else
 				events = eventService.getAllEvents();
+
+			for (int i = 0; i < events.size(); i++) {
+				events.get(i).setGuests(null);
+			}
+
 			return ResponseEntity.ok(events);
-		} catch (DaoException e) {
+		} catch (
+
+		DaoException e) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e);
 		}
 	}
-	
+
+	@GetMapping("/{userId}/upcomingevents")
+	public ResponseEntity<?> getUpcomingEventsByUserId(@PathVariable Integer userId) {
+		try {
+			List<Event> events = eventService.getUpcomingEventsByUserId(userId);
+			return ResponseEntity.status(HttpStatus.OK).body(events);
+		} catch (DaoException e) {
+			ErrorMessage errorMessage = new ErrorMessage();
+			errorMessage.setData(e.getMessage());
+			errorMessage.setMessage(FAILED_TO_FIND);
+			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
+		}
+	}
+
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getEventById(@PathVariable Integer id) {
 		try {
 			Event event = eventService.getEventById(id);
+			event.setGuests(null);
 			return ResponseEntity.status(HttpStatus.OK).body(event);
 		} catch (DaoException e) {
 			ErrorMessage errorMessage = new ErrorMessage();
 			errorMessage.setData(e.getMessage());
-			errorMessage.setMessage("failed to find event in db");
+			errorMessage.setMessage(FAILED_TO_FIND);
 			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
 		}
 	}
@@ -80,7 +149,27 @@ public class EventController {
 		} catch (DaoException e) {
 			ErrorMessage errorMessage = new ErrorMessage();
 			errorMessage.setData(e.getMessage());
-			errorMessage.setMessage("failed to update event in db");
+			errorMessage.setMessage(FAILED_TO_UPDATE);
+			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
+		}
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, path = "/updateList")
+	public ResponseEntity<?> updateListOfEvents(@RequestBody List<Event> events) {
+		try {
+			List<Event> addedEvents = new ArrayList<Event>();
+
+			for (int i = 0; i < events.size(); i++) {
+//				events.get(i).setEventId(id);
+				eventService.updateEvent(events.get(i).getOwnerId(), events.get(i));
+				Event event = eventService.getEventById(events.get(i).getEventId());
+				addedEvents.add(event);
+			}
+			return ResponseEntity.status(HttpStatus.OK).body(addedEvents);
+		} catch (DaoException e) {
+			ErrorMessage errorMessage = new ErrorMessage();
+			errorMessage.setData(e.getMessage());
+			errorMessage.setMessage(FAILED_TO_UPDATE);
 			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
 		}
 	}
