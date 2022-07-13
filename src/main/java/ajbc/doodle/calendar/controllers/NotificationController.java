@@ -2,7 +2,6 @@ package ajbc.doodle.calendar.controllers;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -97,15 +96,12 @@ public class NotificationController {
 		}
 	}
 
-	@RequestMapping(method = RequestMethod.PUT, path = "/{id}")
-	public ResponseEntity<?> updateNotification(@RequestBody List<Notification> notifications,
-			@PathVariable Integer id) {
-
+	@RequestMapping(method = RequestMethod.PUT)
+	public ResponseEntity<?> updateNotification(@RequestBody List<Notification> notifications) {
 		try {
 			List<Notification> addedNotifications = new ArrayList<Notification>();
 
 			for (int i = 0; i < notifications.size(); i++) {
-				notifications.get(i).setNotificationId(id);
 				if (notifications.get(i).getAlertTime().isAfter(LocalDateTime.now()))
 					notifications.get(i).setAlerted(false);
 				notificationService.updateNotification(notifications.get(i));
@@ -115,6 +111,44 @@ public class NotificationController {
 			}
 
 			return ResponseEntity.status(HttpStatus.OK).body(addedNotifications);
+		} catch (DaoException e) {
+			ErrorMessage errorMessage = new ErrorMessage();
+			errorMessage.setData(e.getMessage());
+			errorMessage.setMessage("failed to update user in db");
+			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
+		}
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, path = "/softDelete")
+	public ResponseEntity<?> softDeleteNotifications(@RequestBody List<Integer> notificationIds) {
+
+		try {
+			List<Notification> deletedNotifications = new ArrayList<Notification>();
+			for (int i = 0; i < notificationIds.size(); i++) {
+				Notification notification = notificationService.softDeleteNotification(notificationIds.get(i));
+				deletedNotifications.add(notification);
+			}
+
+			return ResponseEntity.status(HttpStatus.OK).body(deletedNotifications);
+		} catch (DaoException e) {
+			ErrorMessage errorMessage = new ErrorMessage();
+			errorMessage.setData(e.getMessage());
+			errorMessage.setMessage("failed to update user in db");
+			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
+		}
+	}
+	
+	@RequestMapping(method = RequestMethod.DELETE, path = "/hardDelete")
+	public ResponseEntity<?> hardDeleteNotifications(@RequestBody List<Integer> notificationIds) {
+
+		try {
+			List<Notification> deletedNotifications = new ArrayList<Notification>();
+			for (int i = 0; i < notificationIds.size(); i++) {
+				Notification notification = notificationService.hardDeleteNotification(notificationIds.get(i));
+				deletedNotifications.add(notification);
+			}
+
+			return ResponseEntity.status(HttpStatus.OK).body(deletedNotifications);
 		} catch (DaoException e) {
 			ErrorMessage errorMessage = new ErrorMessage();
 			errorMessage.setData(e.getMessage());

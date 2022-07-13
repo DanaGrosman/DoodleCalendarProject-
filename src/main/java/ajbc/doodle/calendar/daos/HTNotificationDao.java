@@ -72,5 +72,9 @@ public class HTNotificationDao implements NotificationDao {
 	public void updateNotification(Notification notification) throws DaoException {
 		template.merge(notification);
 	}
-
+	
+	@Override
+	public void deleteNotification(Notification notification) throws DaoException {
+		template.delete(notification);
+	}
 }

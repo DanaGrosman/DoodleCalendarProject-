@@ -51,21 +51,30 @@ public class NotificationService {
 		List<Notification> notifications = notificationDao.getNotificationByEventId(eventId);
 		return notifications;
 	}
-
-	public Notification updateNotification(Notification notification) throws DaoException {
-		notification.setEvent(eventDao.getEventById(notification.getEventId()));
-		notification.setUser(userDao.getUserById(notification.getUserId()));
-
-		notificationDao.updateNotification(notification);
-
-		notification = notificationDao.getNotificationById(notification.getNotificationId());
-
-		return notification;
-	}
-
+	
 	public List<Notification> getNotificationsNotAlerted() throws DaoException {
 		List<Notification> notifications = notificationDao.getNotificationsNotAlerted();
 		return notifications;
 	}
 
+	public Notification updateNotification(Notification notification) throws DaoException {
+		notification.setEvent(eventDao.getEventById(notification.getEventId()));
+		notification.setUser(userDao.getUserById(notification.getUserId()));
+		notificationDao.updateNotification(notification);
+		notification = notificationDao.getNotificationById(notification.getNotificationId());
+		return notification;
+	}
+
+	public Notification softDeleteNotification(Integer notificationId) throws DaoException {
+		Notification notification = notificationDao.getNotificationById(notificationId);
+		notification.setActive(false);
+		notificationDao.updateNotification(notification);
+		return notification;
+	}
+	
+	public Notification hardDeleteNotification(Integer notificationId) throws DaoException {
+		Notification notification = notificationDao.getNotificationById(notificationId);
+		notificationDao.deleteNotification(notification);
+		return notification;
+	}
 }
