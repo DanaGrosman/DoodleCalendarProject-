@@ -15,8 +15,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,7 +25,7 @@ import lombok.ToString;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(exclude = "guests")
 
 @Entity
 @Table(name = "events")
@@ -46,7 +44,6 @@ public class Event {
 
 	@ManyToMany
 	@JoinTable(name = "user_events", joinColumns = @JoinColumn(name = "eventId"), inverseJoinColumns = @JoinColumn(name = "userId"))
-	@JsonIgnore
 	private List<User> guests;
 
 	@OneToMany(mappedBy = "event", fetch = FetchType.EAGER)

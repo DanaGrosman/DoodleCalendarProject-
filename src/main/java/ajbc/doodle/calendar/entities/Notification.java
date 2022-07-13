@@ -49,40 +49,14 @@ public class Notification {
 	@JoinColumn(name = "userId")
 	private User user;
 
-	private Unit unit;
-	private int quantity;
-	private LocalDateTime localDateTime;
+	private LocalDateTime alertTime;
 	private boolean isActive;
 	private boolean isAlerted;
 
-	public Notification(Integer eventId, Integer userId, Unit unit, int quantity, LocalDateTime localDateTime) {
+	public Notification(Integer eventId, Integer userId, LocalDateTime alertTime) {
 		super();
 		this.eventId = eventId;
 		this.userId = userId;
-		this.unit = unit;
-		this.quantity = quantity;
-		this.localDateTime = localDateTime;
+		this.alertTime = alertTime;
 	}
-
-	public LocalDateTime computeAlertTime() {
-		return (unit == Unit.HOURS) ? this.localDateTime.minusHours(quantity) : this.localDateTime.minusMinutes(quantity);
-	}
-
-//	
-//	
-//	public Notification(Unit unit, int quantity, LocalDateTime localDateTime) {
-//		super();
-//		this.unit = unit;
-//		this.quantity = quantity;
-//		this.localDateTime = localDateTime;
-//	}
-//
-//	public Notification(Integer notificationId, Unit unit, int quantity,
-//			LocalDateTime localDateTime) {
-//		super();
-//		this.notificationId = notificationId;
-//		this.unit = unit;
-//		this.quantity = quantity;
-//		this.localDateTime = localDateTime;
-//	}
 }

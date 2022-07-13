@@ -5,7 +5,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
-import javax.annotation.PostConstruct;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import ajbc.doodle.calendar.daos.DaoException;
+import ajbc.doodle.calendar.entities.Event;
 import ajbc.doodle.calendar.entities.Notification;
 import ajbc.doodle.calendar.entities.User;
 import ajbc.doodle.calendar.entities.webpush.PushMessage;
@@ -33,8 +32,6 @@ import lombok.Setter;
 public class NotificationThread implements Runnable {
 
 	private Notification notification;
-
-//	@Autowired
 	private MessagePushService messagePushService;
 
 	@Autowired
@@ -48,20 +45,19 @@ public class NotificationThread implements Runnable {
 		this.notification = notification;
 		this.messagePushService = messagePushService;
 	}
-	
+
 	@Override
 	public void run() {
-		
+
 		User user;
 		try {
 			user = notification.getUser();
 			messagePushService.sendPushMessage(user,
 					messagePushService.encryptMessage(user, new PushMessage("message: ", notification.toString())));
-			
-		} catch ( InvalidKeyException | JsonProcessingException | NoSuchAlgorithmException
-				| InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchPaddingException
-				| IllegalBlockSizeException | BadPaddingException e) {
-			// TODO Auto-generated catch block
+
+		} catch (InvalidKeyException | JsonProcessingException | NoSuchAlgorithmException | InvalidKeySpecException
+				| InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException
+				| BadPaddingException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
 			System.out.println(e.getMessage());

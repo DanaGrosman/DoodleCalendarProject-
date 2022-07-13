@@ -29,11 +29,12 @@ public class EventController {
 	@Autowired
 	private EventService eventService;
 
-	@PostMapping
-	public ResponseEntity<?> createEvent(Integer id, Event event) {
+	@PostMapping("/{userId}")
+	public ResponseEntity<?> createEvent(@RequestBody Event event, @PathVariable Integer userId) {
 		try {
-			eventService.addEventByUser(id, event);
+			eventService.addEventByUser(userId, event);
 			event = eventService.getEventById(event.getEventId());
+			event.setGuests(null);
 			return ResponseEntity.status(HttpStatus.CREATED).body(event);
 		} catch (DaoException e) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e);
@@ -53,6 +54,19 @@ public class EventController {
 			return ResponseEntity.ok(events);
 		} catch (DaoException e) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e);
+		}
+	}
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<?> getEventById(@PathVariable Integer id) {
+		try {
+			Event event = eventService.getEventById(id);
+			return ResponseEntity.status(HttpStatus.OK).body(event);
+		} catch (DaoException e) {
+			ErrorMessage errorMessage = new ErrorMessage();
+			errorMessage.setData(e.getMessage());
+			errorMessage.setMessage("failed to find event in db");
+			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
 		}
 	}
 

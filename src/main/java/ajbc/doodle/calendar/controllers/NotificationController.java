@@ -1,6 +1,8 @@
 package ajbc.doodle.calendar.controllers;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import ajbc.doodle.calendar.NotificationManager;
 import ajbc.doodle.calendar.daos.DaoException;
 import ajbc.doodle.calendar.entities.ErrorMessage;
 import ajbc.doodle.calendar.entities.Notification;
@@ -32,15 +35,33 @@ public class NotificationController {
 
 	@Autowired
 	MessagePushService messagePushService;
-	
-	@PostMapping
-	public ResponseEntity<?> createNotification(Notification notification) {
+
+	@Autowired
+	NotificationManager notificationManager;
+
+	@PostMapping("/{userId}/{eventId}")
+	public ResponseEntity<?> addNotification(@RequestBody List<Notification> notifications,
+			@PathVariable Integer userId, @PathVariable Integer eventId) {
 		try {
-			notificationService.addNotificationByEventAndUser(notification);
-			notification = notificationService.getNotificationById(notification.getNotificationId());
-			return ResponseEntity.status(HttpStatus.CREATED).body(notification);
+			List<Notification> addedNotifications = new ArrayList<Notification>();
+
+			for (int i = 0; i < notifications.size(); i++) {
+				notifications.get(i).setEventId(eventId);
+				notifications.get(i).setUserId(userId);
+				notificationService.addNotification(notifications.get(i));
+
+				Notification notification = notificationService
+						.getNotificationById(notifications.get(i).getNotificationId());
+				addedNotifications.add(notification);
+				notificationManager.addNotification(notification);
+			}
+
+			return ResponseEntity.status(HttpStatus.CREATED).body(addedNotifications);
 		} catch (DaoException e) {
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e);
+			ErrorMessage errorMessage = new ErrorMessage();
+			errorMessage.setData(e.getMessage());
+			errorMessage.setMessage("failed to add notification to db");
+			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
 		}
 	}
 
@@ -56,7 +77,7 @@ public class NotificationController {
 				notifications = notificationService.getNotificationByEventId(Integer.valueOf(map.get("eventId")));
 			else
 				notifications = notificationService.getAllNotifications();
-			
+
 			return ResponseEntity.ok(notifications);
 		} catch (DaoException e) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e);
@@ -77,13 +98,23 @@ public class NotificationController {
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, path = "/{id}")
-	public ResponseEntity<?> updateNotification(@RequestBody Notification notification, @PathVariable Integer id) {
+	public ResponseEntity<?> updateNotification(@RequestBody List<Notification> notifications,
+			@PathVariable Integer id) {
 
 		try {
-			notification.setNotificationId(id);
-			notificationService.updateNotification(notification);
-			notification = notificationService.getNotificationById(notification.getNotificationId());
-			return ResponseEntity.status(HttpStatus.OK).body(notification);
+			List<Notification> addedNotifications = new ArrayList<Notification>();
+
+			for (int i = 0; i < notifications.size(); i++) {
+				notifications.get(i).setNotificationId(id);
+				if (notifications.get(i).getAlertTime().isAfter(LocalDateTime.now()))
+					notifications.get(i).setAlerted(false);
+				notificationService.updateNotification(notifications.get(i));
+				Notification notification = notificationService
+						.getNotificationById(notifications.get(i).getNotificationId());
+				addedNotifications.add(notification);
+			}
+
+			return ResponseEntity.status(HttpStatus.OK).body(addedNotifications);
 		} catch (DaoException e) {
 			ErrorMessage errorMessage = new ErrorMessage();
 			errorMessage.setData(e.getMessage());
@@ -91,7 +122,7 @@ public class NotificationController {
 			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
 		}
 	}
-	
+
 	@GetMapping(path = "/publicSigningKey", produces = "application/octet-stream")
 	public byte[] publicSigningKey() {
 		return messagePushService.getServerKeys().getPublicKeyUncompressed();

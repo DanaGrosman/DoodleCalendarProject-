@@ -33,15 +33,13 @@ public class AppDB {
 	@EventListener
 	public void seedDb(ContextRefreshedEvent contextRefreshedEvent) {
 //		seedUsersTable();
-		seedEventsTable();
+//		seedEventsTable();
 //		seedNotificationTable();
-
 		
 //		try {
 //			Notification notification = notificationService.getNotificationById(1303);
 //			notification.setUnit(Unit.HOURS);
 //			notification = notificationService.updateNotification(notification);		
-//			
 //		} catch (DaoException e) {
 //			e.printStackTrace();
 //		}
@@ -49,11 +47,11 @@ public class AppDB {
 	}
 
 	private void seedNotificationTable() {
-//		try {
-//
-//		} catch (DaoException e) {
-//			e.printStackTrace();
-//		}		
+		try {
+			notificationService.addNotification(new Notification(1198, 1000, LocalDateTime.now().plusSeconds(15)));
+		} catch (DaoException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void seedEventsTable() {

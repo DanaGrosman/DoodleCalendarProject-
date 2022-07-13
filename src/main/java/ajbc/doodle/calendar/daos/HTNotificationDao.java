@@ -24,11 +24,12 @@ public class HTNotificationDao implements NotificationDao {
 		template.persist(notification);
 		// close session
 	}
-	
+
 	@Override
 	public List<Notification> getAllNotifications() throws DaoException {
 		DetachedCriteria criteria = DetachedCriteria.forClass(Notification.class);
-		return (List<Notification>) template.findByCriteria(criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY));
+		return (List<Notification>) template
+				.findByCriteria(criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY));
 	}
 
 	@Override
@@ -38,7 +39,7 @@ public class HTNotificationDao implements NotificationDao {
 			throw new DaoException("No such notification in DB");
 		return notification;
 	}
-	
+
 	@Override
 	public List<Notification> getNotificationByUserId(Integer userId) throws DaoException {
 		DetachedCriteria criteria = DetachedCriteria.forClass(Notification.class);
@@ -46,7 +47,7 @@ public class HTNotificationDao implements NotificationDao {
 		List<Notification> notifications = ((List<Notification>) template.findByCriteria(criteria));
 		return notifications;
 	}
-	
+
 	@Override
 	public List<Notification> getNotificationByEventId(Integer eventId) throws DaoException {
 		DetachedCriteria criteria = DetachedCriteria.forClass(Notification.class);
@@ -54,11 +55,22 @@ public class HTNotificationDao implements NotificationDao {
 		List<Notification> notifications = ((List<Notification>) template.findByCriteria(criteria));
 		return notifications;
 	}
-	
+
+	@Override
+	public List<Notification> getNotificationsNotAlerted() throws DaoException {
+		DetachedCriteria criteria = DetachedCriteria.forClass(Notification.class)
+				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+
+		criteria.add(Restrictions.eq("isAlerted", false));
+		List<Notification> notifications = ((List<Notification>) template.findByCriteria(criteria));
+		notifications.forEach(System.out::println);
+
+		return notifications;
+	}
+
 	@Override
 	public void updateNotification(Notification notification) throws DaoException {
 		template.merge(notification);
 	}
-	
 
 }

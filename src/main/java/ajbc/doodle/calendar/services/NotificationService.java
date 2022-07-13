@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import ajbc.doodle.calendar.NotificationManager;
 import ajbc.doodle.calendar.daos.DaoException;
 import ajbc.doodle.calendar.daos.EventDao;
 import ajbc.doodle.calendar.daos.NotificationDao;
@@ -28,9 +27,9 @@ public class NotificationService {
 	@Qualifier("htUserDao")
 	UserDao userDao;
 
-	private NotificationManager notificationManager;
-
-	public void addNotificationByEventAndUser(Notification notification) throws DaoException {
+	public void addNotification(Notification notification) throws DaoException {
+		notification.setEvent(eventDao.getEventById(notification.getEventId()));
+		notification.setUser(userDao.getUserById(notification.getUserId()));
 		notificationDao.addNotificationToDB(notification);
 	}
 
@@ -62,6 +61,11 @@ public class NotificationService {
 		notification = notificationDao.getNotificationById(notification.getNotificationId());
 
 		return notification;
+	}
+
+	public List<Notification> getNotificationsNotAlerted() throws DaoException {
+		List<Notification> notifications = notificationDao.getNotificationsNotAlerted();
+		return notifications;
 	}
 
 }

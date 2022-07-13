@@ -20,7 +20,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.auth0.jwt.JWT;

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import ajbc.doodle.calendar.daos.DaoException;
 import ajbc.doodle.calendar.entities.Notification;
+import ajbc.doodle.calendar.entities.User;
 import ajbc.doodle.calendar.services.MessagePushService;
 import ajbc.doodle.calendar.services.NotificationService;
 import ajbc.doodle.calendar.services.UserService;
@@ -36,37 +37,38 @@ public class NotificationManager implements Runnable {
 	private ScheduledThreadPoolExecutor threadPool;
 
 	public NotificationManager() throws DaoException {
-		this.queue = new PriorityQueue<Notification>(
-				(n1, n2) -> n1.computeAlertTime().compareTo(n2.computeAlertTime()));
+		this.queue = new PriorityQueue<Notification>((n1, n2) -> n1.getAlertTime().compareTo(n2.getAlertTime()));
 	}
 
 	@PostConstruct
 	public void initQueue() throws DaoException {
-		this.queue.addAll(notificationService.getAllNotifications());
+		System.out.println("initQueue() start");
+		this.queue.addAll(notificationService.getNotificationsNotAlerted());
+
 		numberOfThreads = queue.size();
 		threadPool = new ScheduledThreadPoolExecutor(numberOfThreads);
-		threadPool.schedule(this, LocalDateTime.now().getSecond(), TimeUnit.SECONDS);
+
+		schedule();
 	}
 
-	public void addNotification(Notification notification) {
-		for (Notification n : (Notification[]) queue.toArray()) {
-			if (n.getNotificationId().equals(notification.getNotificationId())) {
-				queue.remove(n);
-			}
-		}
+	public void addNotification(Notification notification) throws DaoException {
+		// Check if the notification is already exists
+		queue.removeIf(t -> t.getNotificationId().equals(notification.getNotificationId()));
 
 		Notification first = queue.peek();
 		queue.add(notification);
-		if (first == null || notification.getLocalDateTime().isBefore(first.getLocalDateTime())) {
+
+		if (first == null || notification.getAlertTime().isBefore(first.getAlertTime())) {
 			LocalDateTime now = LocalDateTime.now();
-			long seconds = ChronoUnit.SECONDS.between(now, notification.getLocalDateTime());
+			long seconds = ChronoUnit.SECONDS.between(now, notification.getAlertTime());
+			threadPool = new ScheduledThreadPoolExecutor(queue.size());
 			threadPool.schedule(this, seconds, TimeUnit.SECONDS);
 		}
 	}
 
 	@Override
 	public void run() {
-		// TODO: assign thread to send the next notification (top queue) if the user is
+		// assign thread to send the next notification (top queue) if the user is
 		// logged in
 		// if not- mark the notification as irrelevant, move on to the next notification
 		// mark notification as sent if it was sent
@@ -76,46 +78,48 @@ public class NotificationManager implements Runnable {
 		// each thread sends one notification to user
 		// set manager to sleep until the next closest notification timing
 
-		List<Notification> notificationsToPush = new ArrayList<Notification>();
-		Notification notification = queue.peek();
-		Notification current = queue.peek();
-//		LocalDateTime alertTime = notification.computeAlertTime();
-
-		try {
-			
-			while (current.computeAlertTime().equals(notification.computeAlertTime())) {
-				queue.poll();
-
-				if (userService.getUserById(current.getUserId()).getIsLogged()) {
+		List<Notification> notificationsToPush = new ArrayList<>();
+		Notification first = queue.peek();
+		Notification current;
+		
+		if (first != null) {
+			do {
+				current = queue.poll();
+				User user = current.getUser();
+				if (user.getIsLogged() && !current.isAlerted()) {
 					notificationsToPush.add(current);
 				}
 
 				current.setAlerted(true);
-				notificationService.updateNotification(current);
-
+				
+				try {
+					notificationService.updateNotification(current);
+				} catch (DaoException e) {
+					e.printStackTrace();
+				}
+				
 				current = queue.peek();
-			}
 
-			numberOfThreads = notificationsToPush.size();
-			threadPool = new ScheduledThreadPoolExecutor(numberOfThreads);
-			notificationsToPush.forEach(System.out::println);
+			} while (current != null && current.getAlertTime().equals(first.getAlertTime()));
 
 			notificationsToPush.forEach(t -> threadPool.execute(new NotificationThread(t, messagePushService)));
-
-			threadPool.schedule(this, getDelay(queue.peek().getLocalDateTime()), TimeUnit.SECONDS);
-			threadPool.schedule(this, 3, TimeUnit.SECONDS);
-
-		
-		} catch (DaoException e) {
-			e.printStackTrace();
 		}
-		
+
+		schedule();
 
 	}
 
 	private long getDelay(LocalDateTime time) {
-		LocalDateTime now = LocalDateTime.now();
-		long seconds = ChronoUnit.SECONDS.between(now, time);
-		return seconds;
+		return ChronoUnit.SECONDS.between(LocalDateTime.now(), time);
+	}
+
+	private void schedule() {
+		if (queue.peek() != null) {
+			if (queue.peek().getAlertTime().isBefore(LocalDateTime.now()))
+				threadPool.schedule(this, 0, TimeUnit.SECONDS);
+			else
+				threadPool.schedule(this, getDelay(queue.peek().getAlertTime()), TimeUnit.SECONDS);
+		}
+
 	}
 }
