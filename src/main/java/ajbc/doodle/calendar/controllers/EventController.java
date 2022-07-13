@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ajbc.doodle.calendar.daos.DaoException;
 import ajbc.doodle.calendar.entities.ErrorMessage;
 import ajbc.doodle.calendar.entities.Event;
-import ajbc.doodle.calendar.entities.Notification;
 import ajbc.doodle.calendar.services.EventService;
 
 @RestController
@@ -170,6 +169,44 @@ public class EventController {
 			ErrorMessage errorMessage = new ErrorMessage();
 			errorMessage.setData(e.getMessage());
 			errorMessage.setMessage(FAILED_TO_UPDATE);
+			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
+		}
+	}
+	
+	@RequestMapping(method = RequestMethod.PUT, path = "/softDelete")
+	public ResponseEntity<?> softDeleteEvents(@RequestBody List<Integer> eventsIds) {
+
+		try {
+			List<Event> deletedEvents = new ArrayList<Event>();
+			for (int i = 0; i < eventsIds.size(); i++) {
+				Event event = eventService.softDeleteEvent(eventsIds.get(i));
+				deletedEvents.add(event);
+			}
+
+			return ResponseEntity.status(HttpStatus.OK).body(deletedEvents);
+		} catch (DaoException e) {
+			ErrorMessage errorMessage = new ErrorMessage();
+			errorMessage.setData(e.getMessage());
+			errorMessage.setMessage("failed to soft delete event in db");
+			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
+		}
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, path = "/hardDelete")
+	public ResponseEntity<?> hardDeleteEvents(@RequestBody List<Integer> eventsIds) {
+
+		try {
+			List<Event> deletedEvents = new ArrayList<Event>();
+			for (int i = 0; i < eventsIds.size(); i++) {
+				Event event = eventService.hardDeleteEvent(eventsIds.get(i));
+				deletedEvents.add(event);
+			}
+
+			return ResponseEntity.status(HttpStatus.OK).body(deletedEvents);
+		} catch (DaoException e) {
+			ErrorMessage errorMessage = new ErrorMessage();
+			errorMessage.setData(e.getMessage());
+			errorMessage.setMessage("failed to delete event in db");
 			return ResponseEntity.status(HttpStatus.valueOf(500)).body(errorMessage);
 		}
 	}

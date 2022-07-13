@@ -92,4 +92,33 @@ public class EventService {
 		return event;
 	}
 
+	public Event softDeleteEvent(Integer eventId) throws DaoException {
+		Event event = eventDao.getEventById(eventId);
+		event.setActive(false);
+		List<Notification> notifications = new ArrayList<Notification>();
+		notifications.addAll(event.getNotifications());
+		
+		for (int i = 0; i < notifications.size(); i++) {
+			notifications.get(i).setActive(false);
+			notificationDao.updateNotification(notifications.get(i));
+		}
+		
+		eventDao.updateEvent(event);
+		return event;
+	}
+
+	public Event hardDeleteEvent(Integer eventId) throws DaoException {
+		Event event = eventDao.getEventById(eventId);
+		eventDao.deleteEvent(event);
+		
+		List<Notification> notifications = new ArrayList<Notification>();
+		notifications.addAll(event.getNotifications());
+		
+		for (int i = 0; i < notifications.size(); i++) {
+			notificationDao.deleteNotification(notifications.get(i));
+		}
+		
+		return event;
+	}
+
 }

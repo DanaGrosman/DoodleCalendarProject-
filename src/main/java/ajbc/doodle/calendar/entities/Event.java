@@ -48,6 +48,7 @@ public class Event {
 	private LocalDateTime startDateTime;
 	private LocalDateTime endDateTime;
 	private String description;
+	private boolean isActive;
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@ManyToMany
@@ -68,5 +69,6 @@ public class Event {
 		this.endDateTime = endDateTime;
 		this.description = description;
 		this.guests = guests;
+		this.isActive = true;
 	}
 }
